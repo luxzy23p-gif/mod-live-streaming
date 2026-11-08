@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "xfive_live",
+  "version": "${version}",
+  "name": "X Five Live",
+  "description": "Client-side streaming HUD prototype: translucent live chat, music/lyrics display and gift alerts.",
+  "authors": [
+    "X Five"
+  ],
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.xfive.live.XFiveLiveClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.20.1",
+    "minecraft": "~26.2",
+    "java": ">=25",
+    "fabric-api": ">=0.161.0+26.2"
+  }
+}
