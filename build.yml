@@ -1,0 +1,32 @@
+name: Build X Five Live
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+    paths:
+      - '**.java'
+      - '**.json'
+      - '**.gradle'
+      - 'gradle.properties'
+      - 'settings.gradle'
+      - '.github/workflows/build.yml'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.5.1'
+      - name: Build mod JAR
+        run: gradle --no-daemon clean build
+      - name: Upload JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: XFiveLive-0.3.1-Minecraft-26.2
+          path: build/libs/xfive-live-0.3.1.jar
+          if-no-files-found: error
