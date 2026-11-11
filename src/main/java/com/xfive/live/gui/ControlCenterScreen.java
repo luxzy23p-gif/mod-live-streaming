@@ -221,8 +221,8 @@ public final class ControlCenterScreen extends Screen {
         islandStyleButton = Button.builder(Component.literal("Dynamic Bar: " + (c.islandStyle == 1 ? "Boring Notch" : "Classic")),
                 b -> {
                     c.islandStyle = c.islandStyle == 0 ? 1 : 0;
-                    if (c.islandStyle == 1) { c.islandW = Math.max(c.islandW, 480); c.islandH = Math.max(c.islandH, 112); }
-                    else { c.islandW = Math.min(c.islandW, 400); c.islandH = Math.min(c.islandH, 160); }
+                    c.islandW = Math.max(220, Math.min(520, c.islandW));
+                    c.islandH = Math.max(76, Math.min(160, c.islandH));
                     c.save();
                     b.setMessage(Component.literal("Dynamic Bar: " + (c.islandStyle == 1 ? "Boring Notch" : "Classic")));
                 }).bounds(cellX(), gy, gcw, 20).build();
@@ -894,15 +894,15 @@ public final class ControlCenterScreen extends Screen {
     }
 
     private static final class IslandWidthSlider extends AbstractSliderButton {
-        IslandWidthSlider(int x, int y, int w, int h) { super(x, y, w, h, Component.empty(), (XFiveLiveClient.CONFIG.islandW - 140) / 380.0); updateMessage(); }
+        IslandWidthSlider(int x, int y, int w, int h) { super(x, y, w, h, Component.empty(), (XFiveLiveClient.CONFIG.islandW - 220) / 300.0); updateMessage(); }
         @Override protected void updateMessage() { setMessage(Component.literal("Bar width: " + XFiveLiveClient.CONFIG.islandW + " px")); }
-        @Override protected void applyValue() { XFiveLiveClient.CONFIG.islandW = 140 + (int) Math.round(value * 380); }
+        @Override protected void applyValue() { XFiveLiveClient.CONFIG.islandW = 220 + (int) Math.round(value * 300); }
     }
 
     private static final class IslandHeightSlider extends AbstractSliderButton {
-        IslandHeightSlider(int x, int y, int w, int h) { super(x, y, w, h, Component.empty(), (XFiveLiveClient.CONFIG.islandH - 60) / 100.0); updateMessage(); }
+        IslandHeightSlider(int x, int y, int w, int h) { super(x, y, w, h, Component.empty(), (XFiveLiveClient.CONFIG.islandH - 76) / 84.0); updateMessage(); }
         @Override protected void updateMessage() { setMessage(Component.literal("Bar height: " + XFiveLiveClient.CONFIG.islandH + " px")); }
-        @Override protected void applyValue() { XFiveLiveClient.CONFIG.islandH = 60 + (int) Math.round(value * 100); }
+        @Override protected void applyValue() { XFiveLiveClient.CONFIG.islandH = 76 + (int) Math.round(value * 84); }
     }
 
     private static final class IslandTimeSlider extends AbstractSliderButton {

@@ -21,8 +21,8 @@ public final class XFiveConfig {
     public float hudScale = 1.0f;
     public float hudOpacity = 0.85f;
     public boolean dynamicIsland = true;
-    public int islandW = 220;           // lebar kartu, 140..520
-    public int islandH = 84;            // tinggi kartu, 60..160
+    public int islandW = 300;           // lebar Dynamic Bar, 220..520
+    public int islandH = 84;            // tinggi Dynamic Bar, 76..160
     public int islandStyle = 0;         // 0 = Dynamic Island pertama, 1 = Boring Notch
     public int islandColor = 0;         // 0 ikut tema, 1..5 warna tetap
     public boolean islandShowPaused = false;
@@ -92,8 +92,8 @@ public final class XFiveConfig {
         hudScale = flt(p, "general.hudScale", hudScale, 0.5f, 2.0f);
         hudOpacity = flt(p, "general.hudOpacity", hudOpacity, 0.1f, 1.0f);
         dynamicIsland = bool(p, "general.dynamicIsland", dynamicIsland);
-        islandW = integer(p, "island.width", islandW, 140, 520);
-        islandH = integer(p, "island.height", islandH, 60, 160);
+        islandW = integer(p, "island.width", islandW, 220, 520);
+        islandH = integer(p, "island.height", islandH, 76, 160);
         islandColor = integer(p, "island.color", islandColor, 0, 5);
         islandShowPaused = bool(p, "island.showPaused", islandShowPaused);
         islandAutoHide = bool(p, "island.autoHide", islandAutoHide);
