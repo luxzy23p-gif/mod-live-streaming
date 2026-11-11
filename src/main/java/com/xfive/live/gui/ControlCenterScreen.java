@@ -681,7 +681,7 @@ public final class ControlCenterScreen extends Screen {
             return true;
         }
         if ((page == Page.HOME || page == Page.AUDIO || page == Page.FAVORITES) && songSearch != null && inList(event.x(), event.y())) {
-            int row = (int) ((event.y() - audioListTop()) / ROW_H);
+            int row = (int) ((event.y() - audioRowsTop()) / ROW_H);
             List<Integer> shown = filteredSongIndexes();
             int shownIndex = (int) songScroll + row;
             if (event.x() >= audioListX() + audioListW() - 22 && shownIndex >= 0 && shownIndex < shown.size()) {
@@ -701,14 +701,26 @@ public final class ControlCenterScreen extends Screen {
         return false;
     }
 
+    /**
+     * Y-coordinate of the first actual song row. The list has a now-playing banner
+     * and a column header above it; clicks and drawing must use the same row origin.
+     */
+    private int audioRowsTop() {
+        int heroY = contentTop() + 34;
+        int heroH = 56;
+        int listTop = Math.max(audioListTop(), heroY + heroH + 12);
+        return listTop + 29;
+    }
+
     private boolean inList(double mx, double my) {
         int x = audioListX();
-        return mx >= x && mx <= x + audioListW() && my >= audioListTop() && my < audioListBottom();
+        return mx >= x && mx <= x + audioListW()
+                && my >= audioRowsTop() && my < audioListBottom();
     }
 
     private void playRowAt(double my) {
-        int top = audioListTop();
-        int visibleRows = Math.max(1, (audioListBottom() - top) / ROW_H);
+        int top = audioRowsTop();
+        int visibleRows = Math.max(0, (audioListBottom() - top) / ROW_H);
         int row = (int) ((my - top) / ROW_H);
         List<Integer> shown = filteredSongIndexes();
         int index = (int) songScroll + row;
@@ -821,7 +833,7 @@ public final class ControlCenterScreen extends Screen {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if ((page == Page.HOME || page == Page.AUDIO || page == Page.FAVORITES) && mouseX >= audioListX() && mouseX <= audioListX() + audioListW()
-                && mouseY >= audioListTop() && mouseY <= audioListBottom()) {
+                && mouseY >= audioRowsTop() && mouseY <= audioListBottom()) {
             songScroll -= scrollY;
             return true;
         }
