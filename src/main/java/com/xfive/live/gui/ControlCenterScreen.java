@@ -33,7 +33,7 @@ public final class ControlCenterScreen extends Screen {
         Page(String title) { this.title = title; }
     }
 
-    private static final int SIDEBAR_W = 142;
+    private static final int SIDEBAR_W = 176;
     private static final int ROW_H = 22;
     private final Page page;
     private EditBox songSearch;
@@ -70,47 +70,22 @@ public final class ControlCenterScreen extends Screen {
         this.page = page;
     }
 
-    private int panelX() { return Math.max(8, (width - Math.min(720, width - 16)) / 2); }
-    private int panelY() { return Math.max(8, (height - Math.min(430, height - 16)) / 2); }
-    private int panelW() { return Math.min(720, width - 16); }
-    private int panelH() { return Math.min(430, height - 16); }
+    private int panelX() { return Math.max(8, (width - panelW()) / 2); }
+    private int panelY() { return Math.max(8, (height - panelH()) / 2); }
+    private int panelW() { return Math.min(1000, width - 16); }
+    private int panelH() { return Math.min(620, height - 16); }
     private int contentX() { return panelX() + SIDEBAR_W + 18; }
     private int contentW() { return Math.max(140, panelW() - SIDEBAR_W - 34); }
-    private int contentTop() { return panelY() + 46; }
+    private int contentTop() { return panelY() + 68; }
 
     @Override
     protected void init() {
-        int sx = panelX();
-        int sy = panelY();
-        int pw = panelW();
-        int ph = panelH();
         int cx = contentX();
         int cw = contentW();
         int y = contentTop();
 
-        int step = Math.max(20, Math.min(25, (ph - 126) / Page.values().length));
-        int navY = sy + 56;
-        for (Page target : Page.values()) {
-            if (target == Page.HUD || target == Page.CONTROLS || target == Page.APPEARANCE || target == Page.SETTINGS) {
-                if (target == Page.HUD) navY += 10;
-            }
-            addRenderableWidget(button(sx + 10, navY, SIDEBAR_W - 20, step - 4,
-                    target.title, () -> open(target)));
-            navY += step;
-        }
-
         switch (page) {
-            case HOME -> {
-                int half = Math.max(62, (cw - 10) / 2);
-                addRenderableWidget(button(cx, y, half, 27, "Music Library", () -> open(Page.AUDIO)));
-                addRenderableWidget(button(cx + half + 10, y, half, 27, "Favorites", () -> open(Page.FAVORITES)));
-                y += 37;
-                addRenderableWidget(button(cx, y, half, 27, "Custom HUD", () -> open(Page.HUD)));
-                addRenderableWidget(button(cx + half + 10, y, half, 27, "Settings", () -> open(Page.SETTINGS)));
-                y += 38;
-                addRenderableWidget(button(cx, y, cw, 24, "Appearance & Theme", () -> open(Page.APPEARANCE)));
-            }
-            case AUDIO, FAVORITES -> initAudio(cx, cw, y);
+            case HOME, AUDIO, FAVORITES -> initAudio(cx, cw, y);
             case HUD -> initHud(cx, cw, y);
             case CONTROLS -> initControls(cx, cw, y);
             case APPEARANCE -> {
@@ -121,103 +96,91 @@ public final class ControlCenterScreen extends Screen {
                     c.save();
                 }).bounds(cx, y, cw, 22).build();
                 addRenderableWidget(themeBtn);
-                y += 52; // ruang untuk deretan warna tema
-                addRenderableWidget(new OpacitySlider(cx, y, cw, 20)); y += 26;
+                y += 52;
+                addRenderableWidget(new OpacitySlider(cx, y, cw, 20)); y += 30;
                 addRenderableWidget(button(cx, y, cw, 22,
                         "UI style: " + ("dark_music".equals(c.themeStyle) ? "Dark Music" : "Liquid Glass Lite"), () -> {
                             c.themeStyle = "dark_music".equals(c.themeStyle) ? "glass" : "dark_music";
                             c.save();
                             open(Page.APPEARANCE);
                         }));
-                y += 27;
+                y += 30;
                 addToggle(cx, y, cw, "Animations", () -> c.animations = !c.animations);
             }
             case SETTINGS -> {
                 XFiveConfig c = XFiveLiveClient.CONFIG;
-                addToggle(cx, y, cw, "Enable XFiveLive", () -> c.enableMod = !c.enableMod); y += 29;
-                addToggle(cx, y, cw, "Auto resume music", () -> c.autoResume = !c.autoResume); y += 29;
-                addToggle(cx, y, cw, "Show album artwork", () -> c.showArtwork = !c.showArtwork); y += 29;
+                addToggle(cx, y, cw, "Enable XFiveLive", () -> c.enableMod = !c.enableMod); y += 30;
+                addToggle(cx, y, cw, "Auto resume music", () -> c.autoResume = !c.autoResume); y += 30;
+                addToggle(cx, y, cw, "Show album artwork", () -> c.showArtwork = !c.showArtwork); y += 30;
                 addRenderableWidget(button(cx, y, cw, 24, "Save settings", c::save));
             }
         }
 
-        addRenderableWidget(button(sx + 10, sy + ph - 34, SIDEBAR_W - 20, 24, "Close", this::onClose));
+        // Persistent mini-player controls stay visible on every page.
+        initMiniPlayerControls();
     }
 
-    private int audioNowWidth() { return Math.min(166, Math.max(72, contentW() / 3)); }
-    private int audioListX() { return contentX() + audioNowWidth() + 12; }
-    private int audioListW() { return Math.max(70, contentW() - audioNowWidth() - 12); }
-    private int audioPlayerY() { return panelY() + panelH() - 76; }
-    private int audioListTop() { return songSearch == null ? contentTop() + 36 : songSearch.getY() + 33; }
-    private int audioListBottom() { return audioPlayerY() - 10; }
+    private int audioNowWidth() { return 0; }
+    private int audioListX() { return contentX(); }
+    private int audioListW() { return contentW(); }
+    private int audioPlayerY() { return panelY() + panelH() - 88; }
+    private int audioListTop() { return songSearch == null ? contentTop() + 52 : songSearch.getY() + 34; }
+    private int audioListBottom() { return audioPlayerY() - 16; }
 
     private void initAudio(int x, int w, int y) {
-        int nowW = audioNowWidth();
-        int listX = x + nowW + 12;
-        int listW = Math.max(120, w - nowW - 12);
-        int playerY = audioPlayerY();
-
-        int refreshW = Math.min(62, Math.max(38, listW / 4));
-        int searchW = Math.max(40, listW - refreshW - 4);
-        songSearch = new EditBox(GlassPanelRenderer.font(), listX, y + 20, searchW, 19,
+        int searchY = y + 26;
+        int scanW = Math.min(72, Math.max(52, w / 8));
+        int searchW = Math.max(80, w - scanW - 10);
+        songSearch = new EditBox(GlassPanelRenderer.font(), x, searchY, searchW, 22,
                 Component.literal("Search songs"));
-        songSearch.setMaxLength(80);
+        songSearch.setMaxLength(100);
         songSearch.setHint(Component.literal("Search title or artist"));
-        songSearch.setResponder(s -> songScroll = 0);
+        songSearch.setResponder(q -> songScroll = 0);
         songSearch.setFocused(true);
         addRenderableWidget(songSearch);
-        addRenderableWidget(button(listX + listW - refreshW, y + 20, refreshW, 19, "Scan", () -> {
+        addRenderableWidget(button(x + searchW + 8, searchY, scanW, 22, "Refresh", () -> {
             XFiveLiveClient.refreshMusic();
             songScroll = 0;
         }));
+    }
 
-        int pathY = playerY - 42;
-        int addW = Math.min(29, Math.max(20, nowW / 4));
-        int pathW = Math.max(40, nowW - addW - 16);
-        sourceInput = new EditBox(GlassPanelRenderer.font(), x + 7, pathY, pathW, 18,
-                Component.literal("Music folder/file"));
-        sourceInput.setMaxLength(300);
-        sourceInput.setHint(Component.literal("Folder or file path"));
-        addRenderableWidget(sourceInput);
-        addRenderableWidget(button(x + 7 + pathW + 3, pathY, addW, 18, "+", () -> {
-            XFiveLiveClient.addSource(sourceInput.getValue());
-            sourceInput.setValue("");
-            XFiveLiveClient.refreshMusic();
-        }));
-
-        int controlsX = x + nowW + 10;
-        int controlsW = Math.max(120, w - nowW - 20);
-        int gap = 4;
-        int prevW = 38, playW = 48, nextW = 38, repeatW = 54, shuffleW = 58;
-        int used = prevW + playW + nextW + repeatW + shuffleW + gap * 5;
-        int volumeW = Math.max(58, controlsW - used);
-        int cy = playerY + 25;
-
-        addRenderableWidget(button(controlsX, cy, prevW, 21, "Prev", XFiveLiveClient.MUSIC::previous));
-        playPauseButton = Button.builder(Component.literal(XFiveLiveClient.MUSIC.isPlaying() ? "Pause" : "Play"),
+    private void initMiniPlayerControls() {
+        int x = contentX();
+        int y = audioPlayerY() + 27;
+        int w = contentW();
+        int gap = 5;
+        int prevW = 34, playW = 40, nextW = 34, repeatW = 58, shuffleW = 64;
+        int fixed = prevW + playW + nextW + repeatW + shuffleW + gap * 5;
+        int volumeW = Math.max(70, w - fixed - 10);
+        int bx = x + 10;
+        addRenderableWidget(button(bx, y, prevW, 22, "◀◀", XFiveLiveClient.MUSIC::previous));
+        bx += prevW + gap;
+        playPauseButton = Button.builder(Component.literal(XFiveLiveClient.MUSIC.isPlaying() ? "Ⅱ" : "▶"),
                 b -> {
                     XFiveLiveClient.MUSIC.togglePause();
-                    b.setMessage(Component.literal(XFiveLiveClient.MUSIC.isPlaying() ? "Pause" : "Play"));
-                }).bounds(controlsX + prevW + gap, cy, playW, 21).build();
+                    b.setMessage(Component.literal(XFiveLiveClient.MUSIC.isPlaying() ? "Ⅱ" : "▶"));
+                }).bounds(bx, y, playW, 22).build();
         addRenderableWidget(playPauseButton);
-        addRenderableWidget(button(controlsX + prevW + playW + gap * 2, cy, nextW, 21, "Next",
-                XFiveLiveClient.MUSIC::next));
-        int rx = controlsX + prevW + playW + nextW + gap * 3;
+        bx += playW + gap;
+        addRenderableWidget(button(bx, y, nextW, 22, "▶▶", XFiveLiveClient.MUSIC::next));
+        bx += nextW + gap;
         repeatButton = Button.builder(Component.literal("Repeat " + repeatLabel()), b -> {
             XFiveLiveClient.cycleRepeat();
             b.setMessage(Component.literal("Repeat " + repeatLabel()));
-        }).bounds(rx, cy, repeatW, 21).build();
+        }).bounds(bx, y, repeatW, 22).build();
         addRenderableWidget(repeatButton);
-        int sx = rx + repeatW + gap;
+        bx += repeatW + gap;
         shuffleButton = Button.builder(Component.literal("Shuffle " + onOff(XFiveLiveClient.CONFIG.shuffle)), b -> {
             XFiveLiveClient.toggleShuffle();
             b.setMessage(Component.literal("Shuffle " + onOff(XFiveLiveClient.CONFIG.shuffle)));
-        }).bounds(sx, cy, shuffleW, 21).build();
+        }).bounds(bx, y, shuffleW, 22).build();
         addRenderableWidget(shuffleButton);
-        int vx = sx + shuffleW + gap;
-        if (vx + volumeW > x + w) volumeW = Math.max(48, x + w - vx);
-        addRenderableWidget(new VolumeSlider(vx, cy, volumeW, 21));
+        bx += shuffleW + gap;
+        volumeW = Math.max(48, Math.min(volumeW, x + w - bx - 8));
+        addRenderableWidget(new VolumeSlider(bx, y, volumeW, 22));
     }
+
+    // Susunan dua kolom
 
     // Susunan dua kolom supaya semua pengaturan muat di layar HP.
     private int gx;
@@ -422,106 +385,144 @@ public final class ControlCenterScreen extends Screen {
     }
 
     private void drawAudioList(GuiGraphicsExtractor g, Font font, int mouseX, int mouseY) {
-        if ((page != Page.AUDIO && page != Page.FAVORITES) || songSearch == null) return;
+        if ((page != Page.HOME && page != Page.AUDIO && page != Page.FAVORITES) || songSearch == null) return;
         int x = audioListX();
         int w = audioListW();
         int top = audioListTop();
         int bottom = audioListBottom();
         int accent = GlassPanelRenderer.accent(XFiveLiveClient.CONFIG.theme);
-        int nowX = contentX();
-        int nowW = audioNowWidth();
-        int nowY = contentTop() - 2;
-        int playerY = audioPlayerY();
+        PlaylistManager.Track current = XFiveLiveClient.MUSIC.currentTrack();
 
-        // Left "Now Playing" card beside the live playlist.
-        GlassPanelRenderer.panel(g, nowX, nowY, nowW, playerY - nowY - 8,
-                Math.min(0.72f, XFiveLiveClient.CONFIG.customTransparency), accent);
-        GlassPanelRenderer.text(g, font, "NOW PLAYING", nowX + 9, nowY + 10, accent);
-        g.fill(nowX + 10, nowY + 34, nowX + nowW - 10, nowY + 34 + Math.min(104, nowW - 20),
-                GlassPanelRenderer.argb(accent, 0.16f));
-        PlaylistManager.Track currentTrack = XFiveLiveClient.MUSIC.currentTrack();
-        String currentTitle = currentTrack == null ? "No song selected" : currentTrack.title();
-        String currentArtist = currentTrack == null ? XFiveLiveClient.MUSIC.status() : currentTrack.artist();
-        int infoY = nowY + 34 + Math.min(104, nowW - 20) + 13;
-        GlassPanelRenderer.text(g, font, GlassPanelRenderer.trim(currentTitle, 22), nowX + 9, infoY, GlassPanelRenderer.WHITE);
-        GlassPanelRenderer.text(g, font, GlassPanelRenderer.trim(currentArtist, 24), nowX + 9, infoY + 13, GlassPanelRenderer.MUTED);
-        String state = XFiveLiveClient.MUSIC.isPlaying() ? "PLAYING" :
-                (XFiveLiveClient.MUSIC.isLoading() ? "LOADING" : XFiveLiveClient.MUSIC.status().toUpperCase(Locale.ROOT));
-        GlassPanelRenderer.text(g, font, GlassPanelRenderer.trim(state, 20), nowX + 9, infoY + 31, accent);
-        int total = XFiveLiveClient.MUSIC.playlist().size();
-        int active = XFiveLiveClient.MUSIC.playlist().currentIndex();
-        GlassPanelRenderer.text(g, font, (active >= 0 ? (active + 1) : 0) + " / " + total + " tracks",
-                nowX + 9, infoY + 45, GlassPanelRenderer.MUTED);
+        GlassPanelRenderer.text(g, font, page == Page.FAVORITES ? "YOUR FAVORITES" : "MUSIC LIBRARY",
+                x + 2, contentTop() - 12, GlassPanelRenderer.WHITE);
+        String subtitle = page == Page.FAVORITES
+                ? "Your saved tracks, ready to play"
+                : XFiveLiveClient.MUSIC.playlist().size() + " tracks in your local library";
+        GlassPanelRenderer.text(g, font, fit(font, subtitle, w - 4), x + 2, contentTop() + 4, GlassPanelRenderer.MUTED);
 
-        // Right-side song list. Kolom: nomor, judul, artis. Header dan baris memakai posisi kolom yang sama.
-        g.fill(x, top - 2, x + w, bottom, GlassPanelRenderer.argb(GlassPanelRenderer.WHITE, 0.035f));
-        int numX = x + 7;
-        int titleX = x + 30;
-        int artistW = Math.max(56, Math.min(110, w / 4));
-        int artistX = x + w - artistW - 8;
-        int titleMax = Math.max(30, artistX - titleX - 8);
-        int headerY = songSearch.getY() + 24;
+        // Soft hero strip matching the supplied music-player reference.
+        int heroY = contentTop() + 34;
+        int heroH = 56;
+        g.fill(x, heroY, x + w, heroY + heroH, 0x66363A40);
+        g.fill(x, heroY, x + 3, heroY + heroH, GlassPanelRenderer.argb(accent, 0.95f));
+        GlassPanelRenderer.text(g, font, "NOW PLAYING", x + 14, heroY + 10, accent);
+        String title = current == null ? "Choose a song from your library" : current.title();
+        String artist = current == null ? "XFiveLive Music Player" : current.artist();
+        GlassPanelRenderer.text(g, font, fit(font, title, w - 30), x + 14, heroY + 27, GlassPanelRenderer.WHITE);
+        GlassPanelRenderer.text(g, font, fit(font, artist, w - 30), x + 14, heroY + 41, GlassPanelRenderer.MUTED);
+
+        int listTop = Math.max(top, heroY + heroH + 12);
+        g.fill(x, listTop, x + w, bottom, 0x33202024);
+        int numX = x + 12;
+        int titleX = x + 42;
+        int artistW = Math.max(64, Math.min(150, w / 4));
+        int artistX = x + w - artistW - 34;
+        int titleMax = Math.max(45, artistX - titleX - 10);
+        int headerY = listTop + 10;
         GlassPanelRenderer.text(g, font, "#", numX, headerY, GlassPanelRenderer.MUTED);
         GlassPanelRenderer.text(g, font, "TITLE", titleX, headerY, GlassPanelRenderer.MUTED);
         GlassPanelRenderer.text(g, font, "ARTIST", artistX, headerY, GlassPanelRenderer.MUTED);
-        g.fill(x, top - 4, x + w, top - 3, GlassPanelRenderer.argb(GlassPanelRenderer.WHITE, 0.10f));
+        g.fill(x, listTop + 25, x + w, listTop + 26, 0x33FFFFFF);
+
         List<PlaylistManager.Track> tracks = XFiveLiveClient.MUSIC.playlist().tracks();
         List<Integer> shown = filteredSongIndexes();
-        int visibleRows = Math.max(1, (bottom - top) / ROW_H);
+        int rowsTop = listTop + 29;
+        int visibleRows = Math.max(1, (bottom - rowsTop) / ROW_H);
         songScroll = Math.max(0, Math.min(Math.max(0, shown.size() - visibleRows), songScroll));
         int start = (int) songScroll;
-        int textDy = (ROW_H - 8) / 2; // teks setinggi 8 px, dipusatkan di baris
         for (int r = 0; r < visibleRows && start + r < shown.size(); r++) {
             int idx = shown.get(start + r);
-            PlaylistManager.Track t = tracks.get(idx);
-            int ry = top + r * ROW_H;
-            boolean current = idx == XFiveLiveClient.MUSIC.playlist().currentIndex();
-            boolean hover = mouseX >= x && mouseX <= x + w && mouseY >= ry && mouseY <= ry + ROW_H;
-            if (current || hover) {
+            PlaylistManager.Track track = tracks.get(idx);
+            int ry = rowsTop + r * ROW_H;
+            boolean selected = idx == XFiveLiveClient.MUSIC.playlist().currentIndex();
+            boolean hovered = mouseX >= x && mouseX <= x + w && mouseY >= ry && mouseY <= ry + ROW_H;
+            if (selected || hovered) {
                 g.fill(x + 2, ry, x + w - 2, ry + ROW_H - 1,
-                        GlassPanelRenderer.argb(accent, current ? 0.24f : 0.10f));
-                if (current) {
-                    g.fill(x + 2, ry, x + 4, ry + ROW_H - 1, GlassPanelRenderer.argb(accent, 1f));
-                }
+                        GlassPanelRenderer.argb(accent, selected ? 0.22f : 0.09f));
+                if (selected) g.fill(x + 2, ry, x + 4, ry + ROW_H - 1, accent);
             }
-            int color = current ? GlassPanelRenderer.WHITE : GlassPanelRenderer.MUTED;
-            GlassPanelRenderer.text(g, font, current ? ">" : String.valueOf(idx + 1), numX, ry + textDy,
-                    current ? accent : GlassPanelRenderer.MUTED);
-            GlassPanelRenderer.text(g, font, fit(font, t.title(), titleMax), titleX, ry + textDy,
-                    current ? GlassPanelRenderer.WHITE : 0xE6E9F2);
-            GlassPanelRenderer.text(g, font, fit(font, t.artist(), artistW), artistX, ry + textDy, color);
-            String fav = XFiveLiveClient.CONFIG.favoriteMusic.contains(t.path().toAbsolutePath().toString()) ? "♥" : "♡";
-            GlassPanelRenderer.text(g, font, fav, x + w - 12, ry + textDy, accent);
+            GlassPanelRenderer.text(g, font, String.valueOf(idx + 1), numX, ry + 7, GlassPanelRenderer.MUTED);
+            GlassPanelRenderer.text(g, font, fit(font, track.title(), titleMax), titleX, ry + 7,
+                    selected ? GlassPanelRenderer.WHITE : 0xE6E9F2);
+            GlassPanelRenderer.text(g, font, fit(font, track.artist(), artistW), artistX, ry + 7,
+                    GlassPanelRenderer.MUTED);
+            String favorite = XFiveLiveClient.CONFIG.favoriteMusic.contains(track.path().toAbsolutePath().toString()) ? "♥" : "♡";
+            GlassPanelRenderer.text(g, font, favorite, x + w - 18, ry + 7, accent);
         }
-        String count = shown.size() + " / " + tracks.size() + " songs";
-        GlassPanelRenderer.text(g, font, count, x + w - font.width(count) - 5, bottom + 2, GlassPanelRenderer.MUTED);
+        String count = shown.size() + " songs";
+        GlassPanelRenderer.text(g, font, count, x + w - font.width(count) - 4, bottom + 2, GlassPanelRenderer.MUTED);
+    }
 
-        // Persistent mini-player bar spanning both columns.
-        GlassPanelRenderer.panel(g, contentX(), playerY, contentW(), 64,
-                Math.min(0.74f, XFiveLiveClient.CONFIG.customTransparency), accent);
-        String miniTitle = currentTrack == null ? "XFiveLive Player" : currentTrack.title();
-        String miniArtist = currentTrack == null ? "Choose a song from the list" : currentTrack.artist();
-        GlassPanelRenderer.text(g, font, GlassPanelRenderer.trim(miniTitle, 23), contentX() + 9, playerY + 10, GlassPanelRenderer.WHITE);
-        GlassPanelRenderer.text(g, font, GlassPanelRenderer.trim(miniArtist, 25), contentX() + 9, playerY + 25, GlassPanelRenderer.MUTED);
-
-        // Interactive seek bar: click or drag to move forward/backward in the current track.
+    private void drawMiniPlayer(GuiGraphicsExtractor g, Font font) {
+        int x = contentX();
+        int y = audioPlayerY();
+        int w = contentW();
+        int accent = GlassPanelRenderer.accent(XFiveLiveClient.CONFIG.theme);
+        GlassPanelRenderer.panel(g, x, y, w, 72,
+                Math.min(0.90f, XFiveLiveClient.CONFIG.customTransparency), accent);
+        PlaylistManager.Track track = XFiveLiveClient.MUSIC.currentTrack();
+        String title = track == null ? "XFiveLive Music Player" : track.title();
+        String artist = track == null ? "Choose a track from Music Library" : track.artist();
+        GlassPanelRenderer.text(g, font, fit(font, title, Math.max(90, w / 3)), x + 12, y + 10, GlassPanelRenderer.WHITE);
+        GlassPanelRenderer.text(g, font, fit(font, artist, Math.max(90, w / 3)), x + 12, y + 27, GlassPanelRenderer.MUTED);
         long duration = XFiveLiveClient.MUSIC.durationMs();
         long position = XFiveLiveClient.MUSIC.positionMs();
-        float progress = duration > 0L ? Math.max(0f, Math.min(1f, (float) position / duration)) : 0f;
-        int seekX = contentX() + 10;
-        int seekW = Math.max(1, contentW() - 20);
-        int seekY = playerY + 48;
-        int trackColor = GlassPanelRenderer.argb(GlassPanelRenderer.WHITE, 0.24f);
-        int fillColor = GlassPanelRenderer.argb(accent, 0.96f);
-        g.fill(seekX, seekY, seekX + seekW, seekY + 3, trackColor);
+        float progress = duration > 0 ? Math.max(0f, Math.min(1f, (float) position / duration)) : 0f;
+        int seekX = x + 12;
+        int seekW = Math.max(1, w - 24);
+        int seekY = y + 57;
+        g.fill(seekX, seekY, seekX + seekW, seekY + 3, 0x55FFFFFF);
         int filled = Math.round(seekW * progress);
-        if (filled > 0) g.fill(seekX, seekY, seekX + filled, seekY + 3, fillColor);
-        int knobX = seekX + filled;
-        g.fill(knobX - 2, seekY - 2, knobX + 3, seekY + 5, GlassPanelRenderer.WHITE);
-        String elapsed = formatTime(position);
-        String totalTime = formatTime(duration);
-        GlassPanelRenderer.text(g, font, elapsed, seekX, playerY + 54, GlassPanelRenderer.MUTED);
-        GlassPanelRenderer.text(g, font, totalTime, seekX + seekW - font.width(totalTime), playerY + 54, GlassPanelRenderer.MUTED);
+        if (filled > 0) g.fill(seekX, seekY, seekX + filled, seekY + 3, GlassPanelRenderer.argb(accent, 1f));
+        g.fill(seekX + filled - 2, seekY - 2, seekX + filled + 3, seekY + 5, GlassPanelRenderer.WHITE);
+        String elapsed = formatTime(position), total = formatTime(duration);
+        GlassPanelRenderer.text(g, font, elapsed, seekX, y + 65, GlassPanelRenderer.MUTED);
+        GlassPanelRenderer.text(g, font, total, seekX + seekW - font.width(total), y + 65, GlassPanelRenderer.MUTED);
+    }
+
+    private int navY(Page target) {
+        return panelY() + switch (target) {
+            case HOME -> 86;
+            case AUDIO -> 116;
+            case FAVORITES -> 146;
+            case HUD -> 206;
+            case CONTROLS -> 236;
+            case APPEARANCE -> 296;
+            case SETTINGS -> 326;
+        };
+    }
+
+    private void drawSidebar(GuiGraphicsExtractor g, Font font, int x, int y, int h, int accent,
+                             int mouseX, int mouseY) {
+        g.fill(x + 2, y + 2, x + SIDEBAR_W, y + h - 2, 0xEE17191D);
+        GlassPanelRenderer.text(g, font, "XFiveLive", x + 18, y + 20, GlassPanelRenderer.WHITE);
+        GlassPanelRenderer.text(g, font, "MUSIC PLAYER", x + 18, y + 37, GlassPanelRenderer.MUTED);
+        GlassPanelRenderer.text(g, font, "LIBRARY", x + 18, y + 70, 0x858B96);
+        GlassPanelRenderer.text(g, font, "PERSONALIZE", x + 18, y + 190, 0x858B96);
+        GlassPanelRenderer.text(g, font, "PREFERENCES", x + 18, y + 280, 0x858B96);
+        for (Page target : Page.values()) {
+            int by = navY(target);
+            int bx = x + 10, bw = SIDEBAR_W - 20;
+            boolean selected = page == target;
+            boolean hovered = mouseX >= bx && mouseX <= bx + bw && mouseY >= by && mouseY <= by + 24;
+            if (selected || hovered) {
+                g.fill(bx, by, bx + bw, by + 24, selected ? 0xFF35383E : 0xFF282B30);
+                if (selected) g.fill(bx, by + 3, bx + 3, by + 21, accent);
+            }
+            String label = switch (target) {
+                case HOME -> "⌂   Home";
+                case AUDIO -> "♫   Music Library";
+                case FAVORITES -> "♥   Favorites";
+                case HUD -> "▣   Custom HUD";
+                case CONTROLS -> "☷   Player Controls";
+                case APPEARANCE -> "✧   Appearance";
+                case SETTINGS -> "⚙   Settings";
+            };
+            GlassPanelRenderer.text(g, font, fit(font, label, bw - 18), bx + 9, by + 8,
+                    selected ? GlassPanelRenderer.WHITE : 0xC6CAD2);
+        }
+        int closeY = y + h - 42;
+        GlassPanelRenderer.text(g, font, "×   Close", x + 20, closeY + 8, 0xC6CAD2);
     }
 
     @Override
@@ -529,26 +530,16 @@ public final class ControlCenterScreen extends Screen {
         int x = panelX(), y = panelY(), w = panelW(), h = panelH();
         int accent = GlassPanelRenderer.accent(XFiveLiveClient.CONFIG.theme);
         GlassPanelRenderer.panel(g, x, y, w, h, XFiveLiveClient.CONFIG.customTransparency, accent);
-        // sidebar lebih gelap, dengan penanda aksen di halaman aktif
-        g.fill(x + 3, y + 8, x + SIDEBAR_W - 2, y + h - 8, GlassPanelRenderer.argb(0x000000, 0.30f));
-        int step = Math.max(20, Math.min(25, (h - 126) / Page.values().length));
-        int activeY = y + 56 + page.ordinal() * step;
-        if (page.ordinal() >= Page.HUD.ordinal()) activeY += 10;
-        g.fill(x + 6, activeY + 3, x + 9, activeY + step - 8,
-                GlassPanelRenderer.argb(accent, 1f));
         super.extractRenderState(g, mouseX, mouseY, partialTick);
-        g.fill(x + SIDEBAR_W, y + 12, x + SIDEBAR_W + 1, y + h - 12,
-                GlassPanelRenderer.argb(GlassPanelRenderer.WHITE, 0.10f));
         Font font = GlassPanelRenderer.font();
-        GlassPanelRenderer.text(g, font, "XFiveLive", x + 12, y + 14, GlassPanelRenderer.WHITE);
-        GlassPanelRenderer.text(g, font, "MUSIC PLAYER", x + 12, y + 27, GlassPanelRenderer.MUTED);
-        GlassPanelRenderer.text(g, font, "LIBRARY", x + 12, y + 45, GlassPanelRenderer.MUTED);
-        if (page.ordinal() >= Page.HUD.ordinal()) {
-            GlassPanelRenderer.text(g, font, "SETTINGS", x + 12, y + 45 + step * 2 + 4, GlassPanelRenderer.MUTED);
+        drawSidebar(g, font, x, y, h, accent, mouseX, mouseY);
+        g.fill(x + SIDEBAR_W, y + 12, x + SIDEBAR_W + 1, y + h - 12, 0x33FFFFFF);
+        GlassPanelRenderer.text(g, font, page.title.toUpperCase(Locale.ROOT),
+                contentX(), y + 25, GlassPanelRenderer.WHITE);
+        if (page == Page.HOME || page == Page.AUDIO || page == Page.FAVORITES) {
+            drawAudioList(g, font, mouseX, mouseY);
         }
-        GlassPanelRenderer.text(g, font, page.title, x + SIDEBAR_W + 18, y + 20, accent);
-        if (page == Page.HOME) drawHomeDashboard(g, font, mouseX, mouseY);
-        drawAudioList(g, font, mouseX, mouseY);
+        drawMiniPlayer(g, font);
         drawSwatches(g, font);
         if (page == Page.HUD && hudEditMode) {
             int[][] boxes = {
@@ -556,7 +547,7 @@ public final class ControlCenterScreen extends Screen {
                     com.xfive.live.hud.MusicHud.box(),
                     com.xfive.live.hud.LyricsHud.box()
             };
-            GlassPanelRenderer.text(g, font, "DRAG HUD: click a highlighted HUD and move it", 12, height - 18, accent);
+            GlassPanelRenderer.text(g, font, "DRAG HUD: select a highlighted HUD and move it", 12, height - 18, accent);
             for (int i = 0; i < boxes.length; i++) {
                 int[] b = boxes[i];
                 int tint = i % 2 == 0 ? accent : GlassPanelRenderer.CYAN;
@@ -564,14 +555,22 @@ public final class ControlCenterScreen extends Screen {
                         GlassPanelRenderer.argb(tint, 0.18f));
             }
         }
-        PlaylistManager.Track track = XFiveLiveClient.MUSIC.currentTrack();
-        String now = track == null ? XFiveLiveClient.MUSIC.status() : track.title() + " - " + track.artist();
-        GlassPanelRenderer.text(g, font, GlassPanelRenderer.trim(now, 46),
-                x + SIDEBAR_W + 18, y + h - 18, GlassPanelRenderer.MUTED);
     }
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        for (Page target : Page.values()) {
+            int by = navY(target), bx = panelX() + 10, bw = SIDEBAR_W - 20;
+            if (event.x() >= bx && event.x() <= bx + bw && event.y() >= by && event.y() <= by + 24) {
+                open(target);
+                return true;
+            }
+        }
+        if (event.x() >= panelX() + 10 && event.x() <= panelX() + SIDEBAR_W - 10
+                && event.y() >= panelY() + panelH() - 46) {
+            onClose();
+            return true;
+        }
         if (super.mouseClicked(event, doubleClick)) return true;
         if (page == Page.APPEARANCE) {
             for (int i = 0; i < Themes.IDS.length; i++) {
@@ -600,12 +599,12 @@ public final class ControlCenterScreen extends Screen {
                 return true;
             }
         }
-        if ((page == Page.AUDIO || page == Page.FAVORITES) && songSearch != null && inSeekBar(event.x(), event.y())) {
+        if (songSearch != null && inSeekBar(event.x(), event.y())) {
             seekAt(event.x());
             seeking = true;
             return true;
         }
-        if ((page == Page.AUDIO || page == Page.FAVORITES) && songSearch != null && inList(event.x(), event.y())) {
+        if ((page == Page.HOME || page == Page.AUDIO || page == Page.FAVORITES) && songSearch != null && inList(event.x(), event.y())) {
             int row = (int) ((event.y() - audioListTop()) / ROW_H);
             List<Integer> shown = filteredSongIndexes();
             int shownIndex = (int) songScroll + row;
@@ -670,7 +669,7 @@ public final class ControlCenterScreen extends Screen {
             }
             return true;
         }
-        if (seeking && (page == Page.AUDIO || page == Page.FAVORITES)) {
+        if (seeking) {
             seekAt(event.x());
             return true;
         }
@@ -711,15 +710,15 @@ public final class ControlCenterScreen extends Screen {
     private boolean inSeekBar(double mx, double my) {
         int left = contentX() + 7;
         int right = contentX() + contentW() - 7;
-        int top = audioPlayerY() + 48;
+        int top = audioPlayerY() + 57;
         return mx >= left && mx <= right && my >= top - 5 && my <= top + 8;
     }
 
     private void seekAt(double mouseX) {
         long duration = XFiveLiveClient.MUSIC.durationMs();
         if (duration <= 0L) return;
-        int left = contentX() + 10;
-        int trackWidth = Math.max(1, contentW() - 20);
+        int left = contentX() + 12;
+        int trackWidth = Math.max(1, contentW() - 24);
         float fraction = (float) ((mouseX - left) / trackWidth);
         XFiveLiveClient.MUSIC.seekTo(Math.max(0f, Math.min(1f, fraction)));
     }
@@ -745,7 +744,7 @@ public final class ControlCenterScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if ((page == Page.AUDIO || page == Page.FAVORITES) && mouseX >= audioListX() && mouseX <= audioListX() + audioListW()
+        if ((page == Page.HOME || page == Page.AUDIO || page == Page.FAVORITES) && mouseX >= audioListX() && mouseX <= audioListX() + audioListW()
                 && mouseY >= audioListTop() && mouseY <= audioListBottom()) {
             songScroll -= scrollY;
             return true;
