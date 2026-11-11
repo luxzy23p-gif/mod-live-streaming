@@ -52,6 +52,7 @@ public final class ControlCenterScreen extends Screen {
     private Button repeatButton;
     private Button shuffleButton;
     private Button islandModeButton;
+    private Button islandStyleButton;
     private Button islandColorButton;
     private Button pausedButton;
     private Button hudEditButton;
@@ -216,6 +217,15 @@ public final class ControlCenterScreen extends Screen {
         addToggle(cellX(), gy, gcw, "Master HUD", () -> c.showHud = !c.showHud); nextCell();
         addToggle(cellX(), gy, gcw, "Music HUD", () -> c.enableMusic = !c.enableMusic); nextCell();
         addToggle(cellX(), gy, gcw, "Dynamic Island", () -> c.dynamicIsland = !c.dynamicIsland); nextCell();
+        islandStyleButton = Button.builder(Component.literal("Dynamic Bar: " + (c.islandStyle == 1 ? "Boring Notch" : "Classic")),
+                b -> {
+                    c.islandStyle = c.islandStyle == 0 ? 1 : 0;
+                    if (c.islandStyle == 1) { c.islandW = Math.max(c.islandW, 480); c.islandH = Math.max(c.islandH, 112); }
+                    else { c.islandW = Math.min(c.islandW, 400); c.islandH = Math.min(c.islandH, 160); }
+                    c.save();
+                    b.setMessage(Component.literal("Dynamic Bar: " + (c.islandStyle == 1 ? "Boring Notch" : "Classic")));
+                }).bounds(cellX(), gy, gcw, 20).build();
+        addRenderableWidget(islandStyleButton); nextCell();
         addToggle(cellX(), gy, gcw, "Lyrics HUD", () -> c.enableLyrics = !c.enableLyrics); nextCell();
         addRenderableWidget(new HudOpacitySlider(cellX(), gy, gcw, 20)); nextCell();
         addRenderableWidget(new IslandWidthSlider(cellX(), gy, gcw, 20)); nextCell();
@@ -235,8 +245,22 @@ public final class ControlCenterScreen extends Screen {
     private void initControls(int x, int w, int y) {
         XFiveConfig c = XFiveLiveClient.CONFIG;
         gridBegin(x, y, w);
-        islandModeButton = Button.builder(Component.literal("Dynamic Island: " + (c.islandCard ? "Card" : "Pill")),
-                b -> { XFiveLiveClient.toggleIslandCard(); b.setMessage(Component.literal("Dynamic Island: " + (c.islandCard ? "Card" : "Pill"))); })
+        islandStyleButton = Button.builder(Component.literal("Dynamic Bar style: " + (c.islandStyle == 1 ? "Boring Notch" : "Classic")),
+                b -> {
+                    c.islandStyle = c.islandStyle == 0 ? 1 : 0;
+                    if (c.islandStyle == 1) {
+                        c.islandW = Math.max(c.islandW, 480);
+                        c.islandH = Math.max(c.islandH, 112);
+                    } else {
+                        c.islandW = Math.min(c.islandW, 400);
+                        c.islandH = Math.min(c.islandH, 160);
+                    }
+                    c.save();
+                    b.setMessage(Component.literal("Dynamic Bar style: " + (c.islandStyle == 1 ? "Boring Notch" : "Classic")));
+                }).bounds(cellX(), gy, gcw, 20).build();
+        addRenderableWidget(islandStyleButton); nextCell();
+        islandModeButton = Button.builder(Component.literal("Classic shape: " + (c.islandCard ? "Card" : "Pill")),
+                b -> { XFiveLiveClient.toggleIslandCard(); b.setMessage(Component.literal("Classic shape: " + (c.islandCard ? "Card" : "Pill"))); })
                 .bounds(cellX(), gy, gcw, 20).build();
         addRenderableWidget(islandModeButton); nextCell();
         islandColorButton = Button.builder(Component.literal("Island color: " + colorName()),
@@ -795,9 +819,9 @@ public final class ControlCenterScreen extends Screen {
     }
 
     private static final class IslandWidthSlider extends AbstractSliderButton {
-        IslandWidthSlider(int x, int y, int w, int h) { super(x, y, w, h, Component.empty(), (XFiveLiveClient.CONFIG.islandW - 140) / 260.0); updateMessage(); }
+        IslandWidthSlider(int x, int y, int w, int h) { super(x, y, w, h, Component.empty(), (XFiveLiveClient.CONFIG.islandW - 140) / 380.0); updateMessage(); }
         @Override protected void updateMessage() { setMessage(Component.literal("Bar width: " + XFiveLiveClient.CONFIG.islandW + " px")); }
-        @Override protected void applyValue() { XFiveLiveClient.CONFIG.islandW = 140 + (int) Math.round(value * 260); }
+        @Override protected void applyValue() { XFiveLiveClient.CONFIG.islandW = 140 + (int) Math.round(value * 380); }
     }
 
     private static final class IslandHeightSlider extends AbstractSliderButton {

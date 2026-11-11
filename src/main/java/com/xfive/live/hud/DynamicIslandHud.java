@@ -51,10 +51,11 @@ public final class DynamicIslandHud {
     /** Kotak penuh Dynamic Island: {x, y, lebar, tinggi}. Nilai posisi -1 berarti tengah atas layar. */
     public static int[] box() {
         XFiveConfig c = XFiveLiveClient.CONFIG;
-        int w = c.islandW;
-        int h = c.islandCard ? c.islandH : Math.max(24, Math.round(c.islandH * PILL_H / (float) CARD_H));
-        int[] pos = c.hudPositions.get("dynamicIsland");
         int sw = Minecraft.getInstance().getWindow().getGuiScaledWidth();
+        int w = c.islandStyle == 1 ? Math.min(sw - 12, Math.max(420, c.islandW)) : c.islandW;
+        int h = c.islandStyle == 1 ? Math.max(108, c.islandH) :
+                (c.islandCard ? c.islandH : Math.max(24, Math.round(c.islandH * PILL_H / (float) CARD_H)));
+        int[] pos = c.hudPositions.get("dynamicIsland");
         int x = pos[0] < 0 ? (sw - w) / 2 : pos[0];
         int y = pos[1] < 0 ? TOP : pos[1];
         return new int[] {x, y, w, h};
@@ -156,7 +157,9 @@ public final class DynamicIslandHud {
         float progress = dur > 0 ? Math.min(1f, (float) pos / dur) : 0f;
         Font font = GlassPanelRenderer.font();
 
-        if (c.islandCard) {
+        if (c.islandStyle == 1) {
+            drawBoringNotch(g, font, x, y, w, h, title, sub, progress, pos, dur, wasPlaying, alpha, content);
+        } else if (c.islandCard) {
             drawCard(g, font, x, y, w, h, title, sub, progress, pos, dur, wasPlaying, accentColor(), alpha, content);
         } else {
             drawPill(g, font, x, y, w, h, title, sub, progress, content, accentColor(), alpha);
@@ -251,6 +254,99 @@ public final class DynamicIslandHud {
             g.fill(cx + 1, cy - half, cx + bw + 1, cy + half, white);
         } else {
             triangle(g, cx - half + 1, cy, half, half * 2, true, white);
+        }
+    }
+
+    /**
+     * Gaya kedua: Boring Notch. Komposisi mengikuti referensi: kapsul hitam lebar,
+     * label kecil di atas, cover di kiri, metadata dan transport di tengah.
+     * Lapisan transparan + highlight membentuk liquid-glass look tanpa shader blur mahal.
+     */
+    private static void drawBoringNotch(GuiGraphicsExtractor g, Font font, int x, int y, int w, int h,
+                                        String title, String artist, float progress, long posMs, long durMs,
+                                        boolean playing, float alpha, float content) {
+        int radius = Math.max(20, Math.min(30, h / 4));
+        boolean liquid = "glass".equals(XFiveLiveClient.CONFIG.themeStyle);
+        int black = Glass.argb(liquid ? 0x18202C : 0x050609, (liquid ? 0.84f : 0.97f) * alpha);
+        Glass.roundRect(g, x, y, w, h, radius, black,
+                Glass.argb(liquid ? 0x090D16 : 0x000000, (liquid ? 0.90f : 0.99f) * alpha));
+        Glass.roundRect(g, x + 2, y + 2, w - 4, Math.max(4, h / 3), radius - 2,
+                Glass.argb(0xFFFFFF, (liquid ? 0.10f : 0.055f) * alpha),
+                Glass.argb(0xFFFFFF, 0.004f * alpha));
+        if (liquid) {
+            Glass.roundRect(g, x + 4, y + 3, w - 8, Math.max(3, h / 5), radius - 3,
+                    Glass.argb(accentColor(), 0.075f * alpha), Glass.argb(accentColor(), 0.01f * alpha));
+        }
+        Glass.border(g, x, y, w, h, radius, Glass.argb(0xFFFFFF, 0.16f * alpha),
+                Glass.argb(0xFFFFFF, 0.045f * alpha));
+        if (content <= 0.02f) return;
+
+        float ca = alpha * content;
+        int pad = Math.max(12, h / 10);
+        int topY = y + Math.max(9, h / 11);
+        GlassPanelRenderer.text(g, font, "Boring Notch", x + pad, topY, Glass.argb(0xDDE5F5, ca));
+        // small settings glyph and battery indicator on the right, matching the reference layout
+        int gearX = x + w - pad - 82;
+        GlassPanelRenderer.text(g, font, "⚙", gearX, topY - 1, Glass.argb(0xE7EAF0, ca));
+        int batX = x + w - pad - 34;
+        int batY = topY + 1;
+        Glass.roundRect(g, batX, batY, 24, 11, 3, Glass.argb(0xFFFFFF, 0.04f * ca));
+        Glass.border(g, batX, batY, 24, 11, 3, Glass.argb(0xFFFFFF, 0.8f * ca), Glass.argb(0xFFFFFF, 0.65f * ca));
+        g.fill(batX + 3, batY + 3, batX + 18, batY + 8, Glass.argb(0xFFFFFF, ca));
+        g.fill(batX + 24, batY + 4, batX + 26, batY + 7, Glass.argb(0xFFFFFF, 0.8f * ca));
+
+        int art = Math.min(h - 2 * pad - 18, 66);
+        art = Math.max(42, art);
+        int ax = x + pad;
+        int ay = y + h - art - pad;
+        // artwork tile with subtle album-disc motif
+        Glass.roundRect(g, ax, ay, art, art, 11, Glass.argb(0x273747, 0.95f * ca),
+                Glass.argb(0x111923, 0.98f * ca));
+        Glass.disc(g, ax + art / 2, ay + art / 2, Math.max(9, art / 3), Glass.argb(0x8396A9, 0.35f * ca));
+        Glass.disc(g, ax + art / 2, ay + art / 2, Math.max(5, art / 5), Glass.argb(0xDDE8F5, 0.5f * ca));
+        Glass.border(g, ax, ay, art, art, 11, Glass.argb(0xFFFFFF, 0.22f * ca),
+                Glass.argb(0xFFFFFF, 0.08f * ca));
+
+        int textX = ax + art + Math.max(12, pad / 2);
+        int controlsY = ay + art - 16;
+        int rightReserve = 120;
+        int textW = Math.max(80, x + w - textX - rightReserve);
+        GlassPanelRenderer.text(g, font, fit(font, title, textW), textX, ay + 2, Glass.argb(0xFFFFFF, ca));
+        GlassPanelRenderer.text(g, font, fit(font, artist, textW), textX, ay + 17,
+                Glass.argb(0xBFC5D0, 0.92f * ca));
+
+        // Previous / play-pause / next controls
+        int iconY = controlsY;
+        int prevX = textX + 4;
+        drawTransport(g, prevX, iconY, 0, playing, ca);
+        drawTransport(g, prevX + 40, iconY, 1, playing, ca);
+        drawTransport(g, prevX + 80, iconY, 2, playing, ca);
+
+        // tiny animated audio bars at the far right
+        double time = System.nanoTime() / 1_000_000_000.0;
+        for (int i = 0; i < 4; i++) {
+            double wave = playing ? 0.35 + 0.65 * Math.abs(Math.sin(time * 5.2 + i * 1.2)) : 0.25;
+            int bh = Math.max(3, (int) Math.round((7 + i % 2 * 5) * wave));
+            int bx = x + w - pad - 40 + i * 6;
+            int by = ay + art / 2;
+            g.fill(bx, by - bh / 2, bx + 2, by + bh / 2 + 1, Glass.argb(0xDDE6F5, ca));
+        }
+    }
+
+    private static void drawTransport(GuiGraphicsExtractor g, int cx, int cy, int type, boolean playing, float alpha) {
+        int color = Glass.argb(0xF4F6FA, alpha);
+        int half = 5;
+        if (type == 0) {
+            g.fill(cx - 7, cy - half, cx - 5, cy + half, color);
+            triangle(g, cx - 4, cy, half, 9, false, color);
+        } else if (type == 2) {
+            triangle(g, cx - 4, cy, half, 9, true, color);
+            g.fill(cx + 5, cy - half, cx + 7, cy + half, color);
+        } else if (playing) {
+            g.fill(cx - 4, cy - half, cx - 1, cy + half, color);
+            g.fill(cx + 2, cy - half, cx + 5, cy + half, color);
+        } else {
+            triangle(g, cx - 4, cy, half, 10, true, color);
         }
     }
 
