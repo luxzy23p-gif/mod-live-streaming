@@ -124,7 +124,7 @@ public final class ControlCenterScreen extends Screen {
     private int audioListX() { return contentX(); }
     private int audioListW() { return contentW(); }
     private int audioPlayerY() { return panelY() + panelH() - 88; }
-    private int audioListTop() { return songSearch == null ? contentTop() + 52 : songSearch.getY() + 34; }
+    private int audioListTop() { return contentTop() + 131; }
     private int audioListBottom() { return audioPlayerY() - 16; }
 
     private void initAudio(int x, int w, int y) {
