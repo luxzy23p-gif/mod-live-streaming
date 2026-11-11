@@ -566,19 +566,71 @@ public final class ControlCenterScreen extends Screen {
         drawMiniPlayer(g, font);
         drawSwatches(g, font);
         if (page == Page.HUD && hudEditMode) {
-            int[][] boxes = {
-                    com.xfive.live.hud.DynamicIslandHud.box(),
-                    com.xfive.live.hud.MusicHud.box(),
-                    com.xfive.live.hud.LyricsHud.box()
-            };
-            GlassPanelRenderer.text(g, font, "DRAG HUD: select a highlighted HUD and move it", 12, height - 18, accent);
-            for (int i = 0; i < boxes.length; i++) {
-                int[] b = boxes[i];
-                int tint = i % 2 == 0 ? accent : GlassPanelRenderer.CYAN;
-                g.fill(b[0] - 2, b[1] - 2, b[0] + b[2] + 2, b[1] + b[3] + 2,
-                        GlassPanelRenderer.argb(tint, 0.18f));
-            }
+            drawHudPreviews(g, font, accent);
+            GlassPanelRenderer.text(g, font, "HUD PREVIEW: drag each visible preview to reposition it",
+                    12, height - 18, accent);
         }
+    }
+
+    /**
+     * Draws live, labelled previews at the exact coordinates used by the in-game HUD.
+     * These previews remain visible even when music/lyrics are idle, so users can see
+     * and drag every HUD element while configuring it.
+     */
+    private void drawHudPreviews(GuiGraphicsExtractor g, Font font, int accent) {
+        int[] island = com.xfive.live.hud.DynamicIslandHud.box();
+        int[] music = com.xfive.live.hud.MusicHud.box();
+        int[] lyrics = com.xfive.live.hud.LyricsHud.box();
+        XFiveConfig c = XFiveLiveClient.CONFIG;
+
+        // Dynamic Bar / Island preview
+        int ix = island[0], iy = island[1], iw = island[2], ih = island[3];
+        int islandBg = c.islandStyle == 1 ? 0xF2050609 : 0xE51B2029;
+        g.fill(ix, iy, ix + iw, iy + ih, islandBg);
+        g.fill(ix, iy, ix + iw, iy + 2, GlassPanelRenderer.argb(accent, 0.95f));
+        if (c.islandStyle == 1) {
+            GlassPanelRenderer.text(g, font, "BORING NOTCH PREVIEW", ix + 16, iy + 9, 0xFFB8C0CE);
+            GlassPanelRenderer.text(g, font, "Now Playing", ix + 18, iy + 31, 0xFFFFFFFF);
+            GlassPanelRenderer.text(g, font, "Song title  •  Artist", ix + 18, iy + 48, 0xFFB8C0CE);
+            GlassPanelRenderer.text(g, font, "◀◀    ▶    ▶▶", ix + 18, iy + Math.max(68, ih - 23), 0xFFFFFFFF);
+            GlassPanelRenderer.text(g, font, "▮▮▮", ix + iw - 42, iy + Math.max(68, ih - 23), accent);
+        } else {
+            GlassPanelRenderer.text(g, font, "DYNAMIC ISLAND PREVIEW", ix + 10, iy + 8, 0xFFFFFFFF);
+            GlassPanelRenderer.text(g, font, "Song title  •  Artist", ix + 10, iy + 24, 0xFFB8C0CE);
+            g.fill(ix + 10, iy + ih - 8, ix + iw - 10, iy + ih - 6, 0x66FFFFFF);
+            g.fill(ix + 10, iy + ih - 8, ix + 10 + Math.max(1, (iw - 20) / 3), iy + ih - 6, accent);
+        }
+        g.fill(ix - 2, iy - 2, ix + iw + 2, iy, GlassPanelRenderer.argb(accent, 0.95f));
+        g.fill(ix - 2, iy + ih, ix + iw + 2, iy + ih + 2, GlassPanelRenderer.argb(accent, 0.95f));
+        g.fill(ix - 2, iy, ix, iy + ih, GlassPanelRenderer.argb(accent, 0.95f));
+        g.fill(ix + iw, iy, ix + iw + 2, iy + ih, GlassPanelRenderer.argb(accent, 0.95f));
+
+        // Music HUD preview
+        int mx = music[0], my = music[1], mw = music[2], mh = music[3];
+        g.fill(mx, my, mx + mw, my + mh, 0xE51B2029);
+        g.fill(mx, my, mx + mw, my + 2, GlassPanelRenderer.argb(GlassPanelRenderer.CYAN, 0.95f));
+        GlassPanelRenderer.text(g, font, "MUSIC HUD PREVIEW", mx + 6, my + 5, 0xFFFFFFFF);
+        GlassPanelRenderer.text(g, font, "Song title  •  Artist", mx + 6, my + 17, 0xFFB8C0CE);
+        g.fill(mx + 6, my + mh - 6, mx + mw - 6, my + mh - 5, 0x66FFFFFF);
+        g.fill(mx + 6, my + mh - 6, mx + 6 + (mw - 12) / 3, my + mh - 5, GlassPanelRenderer.CYAN);
+        g.fill(mx - 2, my - 2, mx + mw + 2, my, GlassPanelRenderer.argb(GlassPanelRenderer.CYAN, 0.95f));
+        g.fill(mx - 2, my + mh, mx + mw + 2, my + mh + 2, GlassPanelRenderer.argb(GlassPanelRenderer.CYAN, 0.95f));
+        g.fill(mx - 2, my, mx, my + mh, GlassPanelRenderer.argb(GlassPanelRenderer.CYAN, 0.95f));
+        g.fill(mx + mw, my, mx + mw + 2, my + mh, GlassPanelRenderer.argb(GlassPanelRenderer.CYAN, 0.95f));
+
+        // Lyrics preview (three lines at the configured preset/free position)
+        int lx = lyrics[0], ly = lyrics[1], lw = lyrics[2], lh = lyrics[3];
+        g.fill(lx, ly, lx + lw, ly + lh, 0x55303038);
+        String[] lyricLines = {"Previous lyric line", "CURRENT LYRIC PREVIEW", "Next lyric line"};
+        int lineH = Math.max(9, lh / 3);
+        for (int i = 0; i < lyricLines.length; i++) {
+            int color = i == 1 ? c.highlightColor : 0xFFB8C0CE;
+            String line = fit(font, lyricLines[i], Math.max(40, lw - 12));
+            GlassPanelRenderer.text(g, font, line, lx + (lw - font.width(line)) / 2,
+                    ly + 3 + i * lineH, color);
+        }
+        g.fill(lx - 2, ly - 2, lx + lw + 2, ly, GlassPanelRenderer.argb(c.highlightColor, 0.9f));
+        g.fill(lx - 2, ly + lh, lx + lw + 2, ly + lh + 2, GlassPanelRenderer.argb(c.highlightColor, 0.9f));
     }
 
     @Override
