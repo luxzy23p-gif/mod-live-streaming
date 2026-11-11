@@ -539,7 +539,6 @@ public final class ControlCenterScreen extends Screen {
         if (page == Page.HOME || page == Page.AUDIO || page == Page.FAVORITES) {
             drawAudioList(g, font, mouseX, mouseY);
         }
-        drawMiniPlayer(g, font);
         drawSwatches(g, font);
         if (page == Page.HUD && hudEditMode) {
             int[][] boxes = {
