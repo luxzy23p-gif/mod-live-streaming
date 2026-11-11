@@ -555,8 +555,14 @@ public final class ControlCenterScreen extends Screen {
         int x = panelX(), y = panelY(), w = panelW(), h = panelH();
         int accent = GlassPanelRenderer.accent(XFiveLiveClient.CONFIG.theme);
         GlassPanelRenderer.panel(g, x, y, w, h, XFiveLiveClient.CONFIG.customTransparency, accent);
-        super.extractRenderState(g, mouseX, mouseY, partialTick);
         Font font = GlassPanelRenderer.font();
+
+        // Draw the mini-player surface and seek bar BEFORE widgets. The previous
+        // order painted this translucent layer over the transport buttons, making
+        // Play / Repeat / Shuffle look faded and difficult to tap.
+        drawMiniPlayer(g, font);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
+
         drawSidebar(g, font, x, y, h, accent, mouseX, mouseY);
         g.fill(x + SIDEBAR_W, y + 12, x + SIDEBAR_W + 1, y + h - 12, 0x33FFFFFF);
         GlassPanelRenderer.text(g, font, page.title.toUpperCase(Locale.ROOT),
@@ -564,7 +570,6 @@ public final class ControlCenterScreen extends Screen {
         if (page == Page.HOME || page == Page.AUDIO || page == Page.FAVORITES) {
             drawAudioList(g, font, mouseX, mouseY);
         }
-        drawMiniPlayer(g, font);
         drawSwatches(g, font);
         if (page == Page.HUD && hudEditMode) {
             drawHudPreviews(g, font, accent);
