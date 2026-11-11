@@ -1,34 +1,72 @@
-# X Five Live 0.3.1 (Minecraft 26.2)
+# X FIVE LIVE 1.1.0 — Status Build
 
-Client-side Fabric HUD prototype for Minecraft Java 26.2.
+Mod client-side Fabric untuk Minecraft Java 26.2 (target Java 25). Dokumen ini memisahkan dengan jelas apa yang sudah diuji, apa yang baru ditulis, dan apa yang belum dikerjakan.
 
-## Target
-- Minecraft Java: 26.2
-- Fabric Loader: 0.20.1
-- Java: 25
-- Fabric API: 0.161.0+26.2 (required by the current HUD event/keybinding implementation)
-- Sodium: **not required**. The mod does not declare Sodium as a dependency.
+## Sudah diuji (48/48 tes lulus, JDK 21)
 
-## Build the JAR
+Tes ada di `tests/com/xfive/live/tests/XFiveTests.java` dan hanya memakai kode tanpa Minecraft.
 
-The build requires internet access to resolve Minecraft/Fabric/Gradle dependencies and JDK 25.
+- **Parser LRC**: timestamp `[mm:ss]`, `[mm:ss.x]`, `[mm:ss.xx]`, `[mm:ss.xxx]`, beberapa timestamp per baris, tag `[offset:ms]`, dan baris metadata yang dilewati.
+- **Lirik aktif**: pencarian baris berdasarkan waktu (binary search), termasuk sebelum baris pertama dan di akhir lagu.
+- **Playlist**: pindai folder sekali (bukan per frame), baca "Artis - Judul" dari nama file, next/previous dengan wrap-around.
+- **Config**: simpan dan muat `config/xfive-live.properties`, nilai di luar batas dikunci, nilai rusak kembali ke default.
 
-```sh
-gradle --no-daemon clean build
-```
+## UI Control Center 1.1.0
 
-Output: `build/libs/xfive-live-0.3.1.jar`
+- Dua skin UI kini dapat dipilih pada Appearance: **Liquid Glass Lite** dan **Dark Music**. Pilihan disimpan sebagai `appearance.style` dan tidak menghapus pilihan warna aksen.
+- Liquid Glass Lite memakai panel kaca ringan; Dark Music memakai panel charcoal matte dengan aksen tema.
+- **Pilihan font khusus belum diimplementasikan.** UI masih memakai font Minecraft aktif.
+- **Spring Pop-in belum diimplementasikan.** Tombol Animations yang sudah ada belum boleh dianggap sebagai bukti transisi buka/tutup.
+- Animasi penutupan yang mengecil menuju HUD juga belum diimplementasikan.
+- Build sukses hanya membuktikan kompilasi/paket; pengujian visual dan input tetap perlu dilakukan di Minecraft/Fabric.
 
-A GitHub Actions workflow is included at `.github/workflows/build.yml`. Push this project to a GitHub repository, open **Actions → Build X Five Live → Run workflow**, then download the artifact named `XFiveLive-0.3.1-Minecraft-26.2`.
+## Ditulis, tapi belum dikompilasi atau diuji di game
 
-## Install
+- Entrypoint `XFiveLiveClient`, keybind F8/F9/F10, dan registrasi HUD.
+- HUD musik dan lirik, serta `GlassPanelRenderer`.
+- Pemutar WAV (`AudioPlayer`) memakai `javax.sound`. Kodenya terkompilasi di JDK 21, tapi belum pernah benar-benar memutar audio.
+- Nama API Fabric dan Minecraft 26.2 (`KeyMapping.Category`, `KeyMappingHelper`, `GuiGraphicsExtractor.fill/text`, `HudElementRegistry`, dan lainnya) diambil dari dokumentasi dan hasil pencarian, belum dicek terhadap jar asli. Ini tempat paling mungkin error saat pertama kali build.
 
-Put the built JAR in the instance's `mods` folder. Keep Fabric API 0.161.0+26.2 in `mods`. Sodium is optional and not needed by this mod.
+Pemeriksaan sintaks: seluruh file Minecraft tidak punya error parser. Error yang muncul hanya simbol dan paket Minecraft/Fabric yang tidak ada di lingkungan ini.
 
-## Current feature status / limitations
+## Belum dikerjakan (tidak sesuai spesifikasi penuh)
 
-- F8 toggles the HUD.
-- Translucent faux-glass music and chat panels are rendered.
-- The displayed chat, gift, track and lyric values are placeholders until a companion bridge is implemented.
-- Spotify/YouTube search and playback, TikTok/SocialBuzz live connection, profile pictures, timed lyric synchronization, and real popup animations are **not implemented yet**. This build must not be advertised as having those integrations.
-- The HUD uses translucent panels, not a true background blur; true blur would require a compatible rendering implementation.
+- **MP3 dan OGG**: belum didukung. Perlu library decoder tambahan.
+- **Android / Zalith**: `javax.sound` tidak tersedia di Android. Pemutaran audio di HP memerlukan backend audio lain. Build ini belum menyediakannya, jadi musik kemungkinan tidak berbunyi di Zalith.
+- **Layar pengaturan** (`XFiveLiveScreen`, `SettingsScreen`): sudah ada (Control Center, F6 atau Right Shift).
+- **Kontrol musik di HUD** (tombol play/pause/next): belum. HUD hanya menampilkan.
+- **Drag and drop HUD** dan skala per komponen: belum. Posisi diatur lewat `hud.<nama>.x/y` di file config, dan skala masih global.
+- **Animasi transisi Spring Pop-in dan animasi tutup ke HUD, font khusus, album artwork, avatar penonton**: belum.
+- **SRT**: belum.
+- **TikTok LIVE**: di luar cakupan versi ini, sesuai spesifikasi.
+- **Ukuran font lirik**: saat ini hanya mengatur jarak baris, belum menskala teks.
+- **Auto resume**: memutar lagu pertama saat game mulai, bila folder musik sudah diatur.
+- **Right Shift membuka layar**: belum, karena layar belum dibuat.
+
+## Cara build (di PC dengan internet dan JDK 25)
+
+1. Pastikan `loom_version` di `gradle.properties` sesuai versi Fabric Loom terbaru untuk 26.x.
+2. Jalankan `./gradlew build`.
+3. Hasilnya di `build/libs/XFiveLive-1.1.0.jar`.
+
+Jika build gagal, error pertama kemungkinan berasal dari nama API Minecraft yang belum diverifikasi di file HUD, `XFiveLiveClient`, atau `GlassPanelRenderer`.
+
+## Pengaturan
+
+File: `config/xfive-live.properties` (dibuat otomatis saat pertama kali disimpan).
+
+- Folder musik default: `xfive-music` di dalam folder game. Taruh file `.mp3`, `.m4a`, `.ogg`, atau `.wav` di sana. Folder ini dibuat otomatis saat game dibuka.
+- `music.folder`: bisa diganti ke folder lain lewat file config (belum ada menu di dalam game).
+- `lyrics`: file `.lrc` dengan nama sama seperti lagu (`Artis - Judul.wav` dan `Artis - Judul.lrc`) dibaca otomatis saat lagu berganti.
+- `appearance.*`, `general.*`, `hud.*`: lihat `XFiveConfig.java`.
+
+## Tombol
+
+| Tombol | Fungsi |
+|---|---|
+| Right Shift | Buka Control Center (Home) |
+| F6 | Buka Control Center di halaman Audio (daftar lagu dan pemutar) |
+| F8 | Tampilkan/sembunyikan HUD |
+| F9 | Tampilkan/sembunyikan lirik |
+
+Tombol ini terdaftar sebagai keybind Minecraft, sehingga bisa diubah di Controls.

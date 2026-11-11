@@ -1,5 +1,5 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version '1.17.13'
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
 }
 
 version = project.mod_version
@@ -8,13 +8,31 @@ base { archivesName = project.archives_base_name }
 
 repositories {
     maven { url = 'https://maven.fabricmc.net/' }
-    mavenCentral()
 }
 
 dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    // Minecraft 26.x tidak diobfuscate, jadi tidak perlu mappings dan modImplementation.
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+    implementation "javazoom:jlayer:1.0.1"
+    implementation "de.sfuhrm:jaad:0.8.7"
+
+    // Decoder MP3 murni Java (bisa jalan di Android). Dibundel ke dalam jar mod.
+    include "javazoom:jlayer:1.0.1"
+    // Decoder AAC murni Java (domain publik) untuk file M4A. Dibundel ke dalam jar mod.
+    include "de.sfuhrm:jaad:0.8.7"
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 25
 }
 
 processResources {
@@ -22,13 +40,4 @@ processResources {
     filesMatching('fabric.mod.json') {
         expand 'version': project.version
     }
-}
-
-java {
-    toolchain { languageVersion = JavaLanguageVersion.of(25) }
-    withSourcesJar()
-}
-tasks.withType(JavaCompile).configureEach {
-    options.release = 25
-    options.encoding = 'UTF-8'
 }
