@@ -124,7 +124,7 @@ public final class ControlCenterScreen extends Screen {
     private int audioListX() { return contentX(); }
     private int audioListW() { return contentW(); }
     private int audioPlayerY() { return panelY() + panelH() - 88; }
-    private int audioListTop() { return contentTop() + 131; }
+    private int audioListTop() { return songSearch == null ? contentTop() + 52 : songSearch.getY() + 34; }
     private int audioListBottom() { return audioPlayerY() - 16; }
 
     private void initAudio(int x, int w, int y) {
@@ -148,17 +148,11 @@ public final class ControlCenterScreen extends Screen {
         int x = contentX();
         int y = audioPlayerY() + 27;
         int w = contentW();
-        boolean compact = w < 500;
-        int gap = compact ? 3 : 5;
-        int prevW = compact ? 24 : 34;
-        int playW = compact ? 32 : 40;
-        int nextW = compact ? 24 : 34;
-        int repeatW = compact ? 50 : 58;
-        int shuffleW = compact ? 54 : 64;
+        int gap = 5;
+        int prevW = 34, playW = 40, nextW = 34, repeatW = 58, shuffleW = 64;
         int fixed = prevW + playW + nextW + repeatW + shuffleW + gap * 5;
-        int infoW = Math.min(compact ? 112 : 190, Math.max(compact ? 100 : 150, w / 3));
-        int bx = x + infoW;
-        int volumeW = Math.max(70, x + w - bx - fixed - gap - 8);
+        int volumeW = Math.max(70, w - fixed - 10);
+        int bx = x + 10;
         addRenderableWidget(button(bx, y, prevW, 22, "◀◀", XFiveLiveClient.MUSIC::previous));
         bx += prevW + gap;
         playPauseButton = Button.builder(Component.literal(XFiveLiveClient.MUSIC.isPlaying() ? "Ⅱ" : "▶"),
@@ -469,9 +463,8 @@ public final class ControlCenterScreen extends Screen {
         PlaylistManager.Track track = XFiveLiveClient.MUSIC.currentTrack();
         String title = track == null ? "XFiveLive Music Player" : track.title();
         String artist = track == null ? "Choose a track from Music Library" : track.artist();
-        int infoW = Math.min(w < 500 ? 112 : 190, Math.max(w < 500 ? 100 : 150, w / 3));
-        GlassPanelRenderer.text(g, font, fit(font, title, infoW - 18), x + 12, y + 10, GlassPanelRenderer.WHITE);
-        GlassPanelRenderer.text(g, font, fit(font, artist, infoW - 18), x + 12, y + 27, GlassPanelRenderer.MUTED);
+        GlassPanelRenderer.text(g, font, fit(font, title, Math.max(90, w / 3)), x + 12, y + 10, GlassPanelRenderer.WHITE);
+        GlassPanelRenderer.text(g, font, fit(font, artist, Math.max(90, w / 3)), x + 12, y + 27, GlassPanelRenderer.MUTED);
         long duration = XFiveLiveClient.MUSIC.durationMs();
         long position = XFiveLiveClient.MUSIC.positionMs();
         float progress = duration > 0 ? Math.max(0f, Math.min(1f, (float) position / duration)) : 0f;
@@ -517,13 +510,13 @@ public final class ControlCenterScreen extends Screen {
                 if (selected) g.fill(bx, by + 3, bx + 3, by + 21, accent);
             }
             String label = switch (target) {
-                case HOME -> "01   Home";
-                case AUDIO -> "02   Music Library";
-                case FAVORITES -> "03   Favorites";
-                case HUD -> "04   Custom HUD";
-                case CONTROLS -> "05   Player Controls";
-                case APPEARANCE -> "06   Appearance";
-                case SETTINGS -> "07   Settings";
+                case HOME -> "⌂   Home";
+                case AUDIO -> "♫   Music Library";
+                case FAVORITES -> "♥   Favorites";
+                case HUD -> "▣   Custom HUD";
+                case CONTROLS -> "☷   Player Controls";
+                case APPEARANCE -> "✧   Appearance";
+                case SETTINGS -> "⚙   Settings";
             };
             GlassPanelRenderer.text(g, font, fit(font, label, bw - 18), bx + 9, by + 8,
                     selected ? GlassPanelRenderer.WHITE : 0xC6CAD2);
@@ -546,6 +539,7 @@ public final class ControlCenterScreen extends Screen {
         if (page == Page.HOME || page == Page.AUDIO || page == Page.FAVORITES) {
             drawAudioList(g, font, mouseX, mouseY);
         }
+        drawMiniPlayer(g, font);
         drawSwatches(g, font);
         if (page == Page.HUD && hudEditMode) {
             int[][] boxes = {
