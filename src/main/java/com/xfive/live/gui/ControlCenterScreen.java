@@ -165,6 +165,7 @@ public final class ControlCenterScreen extends Screen {
         songSearch.setMaxLength(80);
         songSearch.setHint(Component.literal("Search title or artist"));
         songSearch.setResponder(s -> songScroll = 0);
+        songSearch.setFocused(true);
         addRenderableWidget(songSearch);
         addRenderableWidget(button(listX + listW - refreshW, y + 20, refreshW, 19, "Scan", () -> {
             XFiveLiveClient.refreshMusic();

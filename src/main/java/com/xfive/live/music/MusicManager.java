@@ -59,17 +59,6 @@ public final class MusicManager {
         return n;
     }
 
-    /** Adds an online track (cached temporarily) to the queue and starts playback. */
-    public boolean playOnlineFile(Path file, String title, String artist) {
-        int index = playlist.addExternal(file, title, artist);
-        if (index < 0) {
-            status = "Format lagu online tidak didukung.";
-            return false;
-        }
-        playlist.select(index);
-        return playCurrent();
-    }
-
     /** Memuat dan memutar lagu aktif. Mengembalikan false jika gagal (lihat status()). */
     public boolean playCurrent() {
         PlaylistManager.Track track = playlist.current();

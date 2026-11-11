@@ -172,14 +172,6 @@ public final class PlaylistManager {
         return tracks.get(index);
     }
 
-    /** Adds a temporary or external online track to the current queue. */
-    public synchronized int addExternal(Path file, String title, String artist) {
-        if (file == null || !Files.isRegularFile(file) || !isSupported(file)) return -1;
-        tracks.add(new Track(file, title == null ? file.getFileName().toString() : title,
-                artist == null ? "Unknown Artist" : artist));
-        return tracks.size() - 1;
-    }
-
     public synchronized boolean select(int newIndex) {
         if (newIndex < 0 || newIndex >= tracks.size()) {
             return false;
