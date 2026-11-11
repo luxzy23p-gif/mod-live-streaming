@@ -44,6 +44,7 @@ public final class ControlCenterScreen extends Screen {
     private boolean listDragged = false;
     private double listPressY;
     private double listLastY;
+    private int listPressedTrackIndex = -1;
     private boolean hudEditMode = false;
     private String draggedHudKey = null;
     private int dragOffsetX;
@@ -691,7 +692,10 @@ public final class ControlCenterScreen extends Screen {
                 XFiveLiveClient.CONFIG.save();
                 return true;
             }
-            // ketuk memutar saat jari dilepas; geser menggulir daftar (layar sentuh tidak punya roda mouse)
+            // Capture the exact row at pointer-down. Some touchscreens report a
+            // slightly different release coordinate; never recalculate the song from it.
+            listPressedTrackIndex = shownIndex >= 0 && shownIndex < shown.size()
+                    ? shown.get(shownIndex) : -1;
             listPress = true;
             listDragged = false;
             listPressY = event.y();
@@ -776,9 +780,11 @@ public final class ControlCenterScreen extends Screen {
     public boolean mouseReleased(MouseButtonEvent event) {
         if (listPress) {
             listPress = false;
-            if (!listDragged) {
-                playRowAt(event.y());
+            if (!listDragged && listPressedTrackIndex >= 0) {
+                XFiveLiveClient.MUSIC.playlist().select(listPressedTrackIndex);
+                XFiveLiveClient.MUSIC.playCurrent();
             }
+            listPressedTrackIndex = -1;
             listDragged = false;
             return true;
         }
