@@ -103,8 +103,7 @@ public final class ControlCenterScreen extends Screen {
             case HOME -> {
                 int half = Math.max(62, (cw - 10) / 2);
                 addRenderableWidget(button(cx, y, half, 27, "Music Library", () -> open(Page.AUDIO)));
-                addRenderableWidget(button(cx + half + 10, y, half, 27, "Online Search", () ->
-                        Minecraft.getInstance().setScreenAndShow(new OnlineMusicScreen())));
+                addRenderableWidget(button(cx + half + 10, y, half, 27, "Favorites", () -> open(Page.FAVORITES)));
                 y += 37;
                 addRenderableWidget(button(cx, y, half, 27, "Custom HUD", () -> open(Page.HUD)));
                 addRenderableWidget(button(cx + half + 10, y, half, 27, "Settings", () -> open(Page.SETTINGS)));
