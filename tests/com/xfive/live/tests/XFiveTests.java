@@ -34,6 +34,7 @@ public final class XFiveTests {
         testPlaylist(work.resolve("playlist"));
         testConfig(work.resolve("config"));
         testThemes();
+        testLrclib();
         System.out.println("passed=" + passed + " failed=" + failed);
         if (failed > 0) {
             System.exit(1);
@@ -174,5 +175,19 @@ public final class XFiveTests {
         XFiveConfig e = new XFiveConfig(dir);
         e.load();
         check("config nilai rusak memakai default", e.lyricsFontSize == 10);
+    }
+
+    private static void testLrclib() {
+        String one = "{\"id\":1,\"syncedLyrics\":\"[00:01.00] Hello\\n[00:05.50] World \\\"q\\\"\\u00e9\"}";
+        String got = com.xfive.live.lyrics.LrclibFetcher.firstSynced(one);
+        check("lrclib synced found", got != null && got.startsWith("[00:01.00] Hello\n[00:05.50]"));
+        check("lrclib escapes", got != null && got.contains("\"q\"\u00e9"));
+        String arr = "[{\"syncedLyrics\":null,\"plainLyrics\":\"x\"},{\"syncedLyrics\":\"[00:02.00] Ok\"}]";
+        check("lrclib array skips null", "[00:02.00] Ok".equals(com.xfive.live.lyrics.LrclibFetcher.firstSynced(arr)));
+        check("lrclib none", com.xfive.live.lyrics.LrclibFetcher.firstSynced("{\"syncedLyrics\":null}") == null);
+        check("lrclib stem safe", !com.xfive.live.lyrics.LrclibFetcher.fileStem("A/B", "C:D?").matches(".*[/:?].*"));
+        LyricsManager m = new LyricsManager();
+        m.load(got);
+        check("lrclib parses into lines", m.lines().size() == 2);
     }
 }

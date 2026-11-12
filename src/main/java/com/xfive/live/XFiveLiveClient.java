@@ -272,18 +272,66 @@ public final class XFiveLiveClient implements ClientModInitializer {
         syncLyrics();
     }
 
-    /** Membaca file .lrc hanya saat lagu berganti, bukan tiap tick. */
+    /** Membaca file .lrc hanya saat lagu berganti, bukan tiap tick. Jika tidak ada, coba unduh dari internet. */
     private static void syncLyrics() {
         PlaylistManager.Track track = MUSIC.currentTrack();
-        if (track == lastTrack) {
-            return;
+        if (track != lastTrack) {
+            lastTrack = track;
+            lyricsGeneration++;
+            if (track == null) {
+                LYRICS.clear();
+            } else {
+                Path lrc = findLrc(track);
+                if (lrc != null) {
+                    LYRICS.loadFile(lrc);
+                } else {
+                    LYRICS.clear();
+                    if (CONFIG.autoLyrics) {
+                        fetchLyricsAsync(track, lyricsGeneration);
+                    }
+                }
+            }
         }
-        lastTrack = track;
-        if (track == null) {
-            LYRICS.clear();
-        } else {
-            LYRICS.loadFile(findLrc(track));
+        // hasil unduhan dipasang di thread game, hanya jika lagunya masih sama
+        PendingLyrics ready = pendingLyrics;
+        if (ready != null) {
+            pendingLyrics = null;
+            if (ready.generation == lyricsGeneration) {
+                LYRICS.load(ready.text);
+                MUSIC.setStatus("Lirik ditemukan.");
+            }
         }
+    }
+
+    private record PendingLyrics(int generation, String text) {
+    }
+
+    private static volatile PendingLyrics pendingLyrics;
+    private static volatile int lyricsGeneration;
+    private static final java.util.concurrent.ExecutorService LYRICS_POOL =
+            java.util.concurrent.Executors.newSingleThreadExecutor(r -> {
+                Thread t = new Thread(r, "xfive-lyrics");
+                t.setDaemon(true);
+                return t;
+            });
+
+    private static void fetchLyricsAsync(PlaylistManager.Track track, int generation) {
+        LYRICS_POOL.execute(() -> {
+            String text = com.xfive.live.lyrics.LrclibFetcher.fetch(track.artist(), track.title());
+            if (text == null || generation != lyricsGeneration) {
+                return;
+            }
+            try {
+                Path dir = FabricLoader.getInstance().getGameDir().resolve(LYRICS_FOLDER);
+                Files.createDirectories(dir);
+                Files.writeString(dir.resolve(
+                        com.xfive.live.lyrics.LrclibFetcher.fileStem(track.artist(), track.title()) + ".lrc"),
+                        text, StandardCharsets.UTF_8);
+            } catch (IOException | RuntimeException ignored) {
+                // gagal menyimpan cache, lirik tetap ditampilkan untuk lagu ini
+            }
+            pendingLyrics = new PendingLyrics(generation, text);
+        });
     }
 
     /** Folder lirik buatan sendiri: taruh file .lrc di sini dengan nama sama seperti lagu. */

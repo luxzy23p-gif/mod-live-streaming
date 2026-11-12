@@ -42,6 +42,8 @@ public final class XFiveConfig {
 
     // Lyrics
     public boolean enableLyrics = true;
+    /** Unduh lirik sinkron otomatis dari lrclib.net jika file .lrc tidak ada. */
+    public boolean autoLyrics = true;
     public int lyricsFontSize = 10;
     public int highlightColor = 0x40DFFF;
     public int lyricsPosition = 2; // 0 = atas, 1 = tengah, 2 = bawah
@@ -113,6 +115,7 @@ public final class XFiveConfig {
         for (String item : savedFavorites.split("\\n")) if (!item.isBlank()) favoriteMusic.add(item.strip());
 
         enableLyrics = bool(p, "lyrics.enable", enableLyrics);
+        autoLyrics = bool(p, "lyrics.auto", autoLyrics);
         lyricsFontSize = integer(p, "lyrics.fontSize", lyricsFontSize, 6, 20);
         highlightColor = integer(p, "lyrics.highlightColor", highlightColor, 0, 0xFFFFFF);
         lyricsPosition = integer(p, "lyrics.position", lyricsPosition, 0, 2);
@@ -156,6 +159,7 @@ public final class XFiveConfig {
         put(p, "music.favorites", String.join("\\n", favoriteMusic));
 
         put(p, "lyrics.enable", enableLyrics);
+        put(p, "lyrics.auto", autoLyrics);
         put(p, "lyrics.fontSize", lyricsFontSize);
         put(p, "lyrics.highlightColor", highlightColor);
         put(p, "lyrics.position", lyricsPosition);
