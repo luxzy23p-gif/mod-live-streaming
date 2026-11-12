@@ -94,8 +94,8 @@ public final class XFiveConfig {
         hudScale = flt(p, "general.hudScale", hudScale, 0.5f, 2.0f);
         hudOpacity = flt(p, "general.hudOpacity", hudOpacity, 0.1f, 1.0f);
         dynamicIsland = bool(p, "general.dynamicIsland", dynamicIsland);
-        islandW = integer(p, "island.width", islandW, 220, 520);
-        islandH = integer(p, "island.height", islandH, 76, 160);
+        islandW = integer(p, "island.width", islandW, 0, 520);
+        islandH = integer(p, "island.height", islandH, 0, 160);
         islandColor = integer(p, "island.color", islandColor, 0, 5);
         islandShowPaused = bool(p, "island.showPaused", islandShowPaused);
         islandAutoHide = bool(p, "island.autoHide", islandAutoHide);

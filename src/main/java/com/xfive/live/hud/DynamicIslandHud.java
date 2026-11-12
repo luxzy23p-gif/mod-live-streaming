@@ -52,9 +52,9 @@ public final class DynamicIslandHud {
     public static int[] box() {
         XFiveConfig c = XFiveLiveClient.CONFIG;
         int sw = Minecraft.getInstance().getWindow().getGuiScaledWidth();
-        int w = c.islandStyle == 1 ? Math.min(sw - 12, Math.max(420, c.islandW)) : c.islandW;
-        int h = c.islandStyle == 1 ? Math.max(108, c.islandH) :
-                (c.islandCard ? c.islandH : Math.max(24, Math.round(c.islandH * PILL_H / (float) CARD_H)));
+        int w = c.islandW <= 0 ? 0 : Math.min(sw - 12, Math.max(100, c.islandStyle == 1 ? c.islandW : c.islandW));
+        int h = c.islandH <= 0 ? 0 : Math.max(40, c.islandStyle == 1 ? c.islandH :
+                (c.islandCard ? c.islandH : Math.max(24, Math.round(c.islandH * PILL_H / (float) CARD_H))));
         int[] pos = c.hudPositions.get("dynamicIsland");
         int x = pos[0] < 0 ? (sw - w) / 2 : pos[0];
         int y = pos[1] < 0 ? TOP : pos[1];
@@ -130,6 +130,7 @@ public final class DynamicIslandHud {
         }
 
         int[] b = box();
+        if (b[2] <= 0 || b[3] <= 0) return;
         int capW = Math.max(44, Math.min(76, b[2] / 2));
         int capH = Math.min(CAP_H, b[3]);
         int w = Math.max(capW, Math.round(capW + (b[2] - capW) * ew));
