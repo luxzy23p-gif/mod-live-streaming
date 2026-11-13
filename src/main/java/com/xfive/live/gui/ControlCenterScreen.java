@@ -944,18 +944,12 @@ public final class ControlCenterScreen extends Screen {
         XFiveConfig c = XFiveLiveClient.CONFIG;
 
         int ix = island[0], iy = island[1], iw = island[2], ih = island[3];
-        g.fill(ix, iy, ix + iw, iy + ih, c.islandStyle == 1 ? 0xF2050609 : 0xE51B2029);
+        g.fill(ix, iy, ix + iw, iy + ih, 0xE51B2029);
         g.fill(ix, iy, ix + iw, iy + 2, a(accent, 0.95f));
-        if (c.islandStyle == 1) {
-            GlassPanelRenderer.text(g, font, "BORING NOTCH PREVIEW", ix + 16, iy + 9, 0xB8C0CE);
-            GlassPanelRenderer.text(g, font, "Now Playing", ix + 18, iy + 31, 0xFFFFFF);
-            GlassPanelRenderer.text(g, font, "Song title - Artist", ix + 18, iy + 48, 0xB8C0CE);
-        } else {
-            GlassPanelRenderer.text(g, font, "DYNAMIC ISLAND PREVIEW", ix + 10, iy + 8, 0xFFFFFF);
-            GlassPanelRenderer.text(g, font, "Song title - Artist", ix + 10, iy + 24, 0xB8C0CE);
-            g.fill(ix + 10, iy + ih - 8, ix + iw - 10, iy + ih - 6, 0x66FFFFFF);
-            g.fill(ix + 10, iy + ih - 8, ix + 10 + Math.max(1, (iw - 20) / 3), iy + ih - 6, 0xFF000000 | accent);
-        }
+        GlassPanelRenderer.text(g, font, "DYNAMIC ISLAND PREVIEW", ix + 10, iy + 8, 0xFFFFFF);
+        GlassPanelRenderer.text(g, font, "Song title - Artist", ix + 10, iy + 24, 0xB8C0CE);
+        g.fill(ix + 10, iy + ih - 8, ix + iw - 10, iy + ih - 6, 0x66FFFFFF);
+        g.fill(ix + 10, iy + ih - 8, ix + 10 + Math.max(1, (iw - 20) / 3), iy + ih - 6, 0xFF000000 | accent);
         outline(g, ix, iy, iw, ih, a(accent, 0.95f));
 
         int mx = music[0], my = music[1], mw = music[2], mh = music[3];
@@ -1118,11 +1112,6 @@ public final class ControlCenterScreen extends Screen {
                 out.add(slider("Lyrics sync", () -> (c.lyricsOffsetMs + 3000) / 6000.0,
                         v -> c.lyricsOffsetMs = (int) (Math.round((v * 6000.0 - 3000.0) / 50.0) * 50),
                         () -> (c.lyricsOffsetMs > 0 ? "+" : "") + c.lyricsOffsetMs + " ms"));
-                out.add(cycle("Dynamic Bar", () -> c.islandStyle == 1 ? "Boring Notch" : "Classic", () -> {
-                    c.islandStyle = c.islandStyle == 0 ? 1 : 0;
-                    c.islandW = Math.max(0, Math.min(520, c.islandW));
-                    c.islandH = Math.max(0, Math.min(160, c.islandH));
-                }));
                 out.add(slider("HUD opacity", () -> (c.hudOpacity - 0.1) / 0.9,
                         v -> c.hudOpacity = (float) (0.1 + v * 0.9),
                         () -> Math.round(c.hudOpacity * 100) + "%"));

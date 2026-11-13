@@ -42,8 +42,8 @@ public final class LyricsHud {
         if (ly.isEmpty()) {
             return;
         }
-        long pos = LyricStyle.shifted(XFiveLiveClient.MUSIC.positionMs(), c.lyricsOffsetMs);
-        int idx = ly.indexAt(pos);
+        long songPos = LyricStyle.shifted(XFiveLiveClient.MUSIC.positionMs(), c.lyricsOffsetMs);
+        int idx = ly.indexAt(songPos);
         if (idx < 0) {
             return;
         }
@@ -69,7 +69,7 @@ public final class LyricsHud {
             drawCentered(g, font, ly.textAt(idx - 1), cx, baseY, GlassPanelRenderer.MUTED);
             drawCentered(g, font, ly.textAt(idx + 1), cx, baseY + lineH * 2, GlassPanelRenderer.MUTED);
         }
-        long since = pos - ly.lines().get(idx).timeMs();
+        long since = songPos - ly.lines().get(idx).timeMs();
         drawActive(g, font, ly.textAt(idx), cx, baseY + lineH, highlight, c,
                 since, LyricStyle.lineDuration(ly.lines(), idx));
         if (!c.lyricsMinimal) {

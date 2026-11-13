@@ -23,7 +23,6 @@ public final class XFiveConfig {
     public boolean dynamicIsland = true;
     public int islandW = 300;           // lebar Dynamic Bar, 220..520
     public int islandH = 84;            // tinggi Dynamic Bar, 76..160
-    public int islandStyle = 0;         // 0 = Dynamic Island pertama, 1 = Boring Notch
     public int islandColor = 0;         // 0 ikut tema, 1..5 warna tetap
     public boolean islandShowPaused = false;
     public boolean islandAutoHide = false;  // kartu menutup sendiri setelah beberapa detik
@@ -111,7 +110,6 @@ public final class XFiveConfig {
         islandAutoHide = bool(p, "island.autoHide", islandAutoHide);
         islandShowSec = integer(p, "island.showSec", islandShowSec, 2, 30);
         islandCard = bool(p, "island.card", islandCard);
-        islandStyle = integer(p, "island.style", islandStyle, 0, 1);
 
         enableMusic = bool(p, "music.enable", enableMusic);
         defaultVolume = flt(p, "music.defaultVolume", defaultVolume, 0f, 1f);
@@ -162,7 +160,6 @@ public final class XFiveConfig {
         put(p, "island.autoHide", islandAutoHide);
         put(p, "island.showSec", islandShowSec);
         put(p, "island.card", islandCard);
-        put(p, "island.style", islandStyle);
 
         put(p, "music.enable", enableMusic);
         put(p, "music.defaultVolume", defaultVolume);
