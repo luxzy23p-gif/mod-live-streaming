@@ -12,7 +12,7 @@ import com.xfive.live.music.PlaylistManager;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fabricmc.loader.api.FabricLoader;
@@ -252,7 +252,7 @@ public final class XFiveLiveClient implements ClientModInitializer {
     }
 
     private static KeyMapping register(String name, int key, KeyMapping.Category category) {
-        return KeyMappingHelper.registerKeyMapping(
+        return KeyBindingHelper.registerKeyBinding(
                 new KeyMapping(name, InputConstants.Type.KEYSYM, key, category));
     }
 
