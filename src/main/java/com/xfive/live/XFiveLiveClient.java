@@ -258,7 +258,7 @@ public final class XFiveLiveClient implements ClientModInitializer {
 
     private static void onTick() {
         while (settingsKey.consumeClick()) {
-            Minecraft.getInstance().setScreenAndShow(new ControlCenterScreen());
+            Minecraft.getInstance().setScreen(new ControlCenterScreen());
         }
         while (hudKey.consumeClick()) {
             CONFIG.showHud = !CONFIG.showHud;
@@ -270,7 +270,7 @@ public final class XFiveLiveClient implements ClientModInitializer {
         }
 
         while (musicCenterKey.consumeClick()) {
-            Minecraft.getInstance().setScreenAndShow(ControlCenterScreen.audio());
+            Minecraft.getInstance().setScreen(ControlCenterScreen.audio());
         }
 
         DynamicIslandHud.onTick();

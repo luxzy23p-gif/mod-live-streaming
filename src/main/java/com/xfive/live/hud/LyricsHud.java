@@ -8,7 +8,7 @@ import com.xfive.live.render.Glass;
 import com.xfive.live.render.GlassPanelRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 
 /**
  * HUD lirik: baris sebelumnya, baris aktif (disorot), dan baris berikutnya.
@@ -33,7 +33,7 @@ public final class LyricsHud {
         return new int[] {(sw - WIDTH) / 2, presetBaseY(c, sh) - 6, WIDTH, h};
     }
 
-    public static void render(GuiGraphicsExtractor g) {
+    public static void render(GuiGraphics g) {
         XFiveConfig c = XFiveLiveClient.CONFIG;
         if (!c.enableLyrics) {
             return;
@@ -97,7 +97,7 @@ public final class LyricsHud {
     }
 
     /** Baris aktif dengan animasi masuk dan sorot karaoke. Semua murni fill/teks, tanpa shader. */
-    private static void drawActive(GuiGraphicsExtractor g, Font font, String full, int cx, int y, int hl,
+    private static void drawActive(GuiGraphics g, Font font, String full, int cx, int y, int hl,
                                    XFiveConfig c, long since, long dur) {
         if (full == null || full.isEmpty()) {
             return;
@@ -153,7 +153,7 @@ public final class LyricsHud {
         }
     }
 
-    private static void drawCentered(GuiGraphicsExtractor g, Font font, String s, int cx, int y, int rgb) {
+    private static void drawCentered(GuiGraphics g, Font font, String s, int cx, int y, int rgb) {
         if (s == null || s.isEmpty()) {
             return;
         }

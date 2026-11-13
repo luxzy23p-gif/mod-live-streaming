@@ -7,7 +7,7 @@ import com.xfive.live.render.Glass;
 import com.xfive.live.render.GlassPanelRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 
 /**
  * Pop-up musik gaya Dynamic Island, bertema liquid glass. Saat lagu mulai, berganti, atau dijeda,
@@ -81,7 +81,7 @@ public final class DynamicIslandHud {
         lastTrack = track;
     }
 
-    public static void render(GuiGraphicsExtractor g) {
+    public static void render(GuiGraphics g) {
         XFiveConfig c = XFiveLiveClient.CONFIG;
         float dt = advanceTime();
         MusicHolder m = MusicHolder.read();
@@ -178,7 +178,7 @@ public final class DynamicIslandHud {
      * Menggambar kartu kaca. Isi mengikuti tinggi h (84 = ukuran dasar). content 0..1 mengatur
      * munculnya isi (sampul, teks, progres, tombol) saat kartu masih tumbuh.
      */
-    public static void drawCard(GuiGraphicsExtractor g, Font font, int x, int y, int w, int h,
+    public static void drawCard(GuiGraphics g, Font font, int x, int y, int w, int h,
                                 String title, String artist, float progress, long posMs, long durMs,
                                 boolean playing, int accent, float alpha, float content) {
         float s = h / (float) CARD_H;
@@ -259,7 +259,7 @@ public final class DynamicIslandHud {
     // ---- Tampilan pil ----
 
     /** Menggambar pil kaca: judul, artis, dan garis progres tipis. */
-    public static void drawPill(GuiGraphicsExtractor g, Font font, int x, int y, int w, int h,
+    public static void drawPill(GuiGraphics g, Font font, int x, int y, int w, int h,
                                 String title, String sub, float progress, float content, int accent, float alpha) {
         Glass.panel(g, x, y, w, h, h / 2, alpha, accent);
         if (content <= 0.4f) {
@@ -286,7 +286,7 @@ public final class DynamicIslandHud {
         return Math.round(v * s);
     }
 
-    private static void triangle(GuiGraphicsExtractor g, int x, int cy, int half, int width, boolean right, int argb) {
+    private static void triangle(GuiGraphics g, int x, int cy, int half, int width, boolean right, int argb) {
         for (int i = 0; i < width; i++) {
             float frac = right ? 1f - (float) i / width : (float) i / width;
             int hh = Math.max(1, Math.round(half * frac));

@@ -6,7 +6,7 @@ import com.xfive.live.music.MusicManager;
 import com.xfive.live.music.PlaylistManager;
 import com.xfive.live.render.GlassPanelRenderer;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 
 /** HUD musik: judul, artis, status, dan progress bar. Posisinya bisa digeser di menu. */
 public final class MusicHud {
@@ -22,7 +22,7 @@ public final class MusicHud {
         return new int[] {pos[0], pos[1], WIDTH, HEIGHT};
     }
 
-    public static void render(GuiGraphicsExtractor g) {
+    public static void render(GuiGraphics g) {
         XFiveConfig c = XFiveLiveClient.CONFIG;
         if (!c.enableMusic) {
             return;

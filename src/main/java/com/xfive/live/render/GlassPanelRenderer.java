@@ -2,7 +2,7 @@ package com.xfive.live.render;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.MutableComponent;
@@ -37,7 +37,7 @@ public final class GlassPanelRenderer {
     }
 
     /** Panel kaca (liquid glass) untuk HUD. Lihat Glass.panel. */
-    public static void panel(GuiGraphicsExtractor g, int x, int y, int w, int h, float alpha, int accentRgb) {
+    public static void panel(GuiGraphics g, int x, int y, int w, int h, float alpha, int accentRgb) {
         if ("dark_music".equals(com.xfive.live.XFiveLiveClient.CONFIG.themeStyle)) {
             // Matte music-player skin: opaque-looking charcoal surfaces with restrained accent.
             // Keep drawing lightweight (a few fills; no shader, blur pass, or per-frame allocations).
@@ -80,17 +80,17 @@ public final class GlassPanelRenderer {
         return c;
     }
 
-    public static void text(GuiGraphicsExtractor g, Font font, String s, int x, int y, int rgb) {
-        g.text(font, styled(s), x, y, 0xFF000000 | (rgb & 0xFFFFFF), true);
+    public static void text(GuiGraphics g, Font font, String s, int x, int y, int rgb) {
+        g.drawString(font, styled(s), x, y, 0xFF000000 | (rgb & 0xFFFFFF), true);
     }
 
     /** Seperti text() tetapi dengan transparansi (0..1). Alpha terlalu kecil dibulatkan agar tidak dianggap opak. */
-    public static void textAlpha(GuiGraphicsExtractor g, Font font, String s, int x, int y, int rgb, float alpha) {
+    public static void textAlpha(GuiGraphics g, Font font, String s, int x, int y, int rgb, float alpha) {
         int a = Math.round(Math.max(0f, Math.min(1f, alpha)) * 255f);
         if (a < 8) {
             return;
         }
-        g.text(font, styled(s), x, y, (a << 24) | (rgb & 0xFFFFFF), true);
+        g.drawString(font, styled(s), x, y, (a << 24) | (rgb & 0xFFFFFF), true);
     }
 
     /** Lebar teks dalam piksel dengan font yang sama seperti text(). */

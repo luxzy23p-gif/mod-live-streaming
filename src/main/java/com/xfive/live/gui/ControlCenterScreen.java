@@ -11,7 +11,7 @@ import com.xfive.live.render.Glass;
 import com.xfive.live.render.GlassPanelRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -301,7 +301,7 @@ public final class ControlCenterScreen extends Screen {
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         // Latar sederhana (tanpa blur bawaan Minecraft) supaya ringan di HP.
         float a = (hudEditMode ? 0.20f : 0.55f) * backdropAlpha();
         g.fill(0, 0, width, height, GlassPanelRenderer.argb(0x000000, a));
@@ -327,7 +327,7 @@ public final class ControlCenterScreen extends Screen {
         return in(mx, my, r[0], r[1], r[2], r[3]);
     }
 
-    private static void icon(GuiGraphicsExtractor g, String[] bmp, int x, int y, int color) {
+    private static void icon(GuiGraphics g, String[] bmp, int x, int y, int color) {
         for (int r = 0; r < bmp.length; r++) {
             String row = bmp[r];
             int c = 0;
@@ -345,14 +345,14 @@ public final class ControlCenterScreen extends Screen {
         }
     }
 
-    private static void triRight(GuiGraphicsExtractor g, int x, int y, int h, int color) {
+    private static void triRight(GuiGraphics g, int x, int y, int h, int color) {
         for (int i = 0; i < h; i++) {
             int w = Math.min(i, h - 1 - i) + 1;
             g.fill(x, y + i, x + w, y + i + 1, color);
         }
     }
 
-    private static void triLeft(GuiGraphicsExtractor g, int x, int y, int h, int w0, int color) {
+    private static void triLeft(GuiGraphics g, int x, int y, int h, int w0, int color) {
         for (int i = 0; i < h; i++) {
             int w = Math.min(i, h - 1 - i) + 1;
             g.fill(x + w0 - w, y + i, x + w0, y + i + 1, color);
@@ -371,7 +371,7 @@ public final class ControlCenterScreen extends Screen {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         layout();
         Font font = GlassPanelRenderer.font();
 
@@ -420,14 +420,14 @@ public final class ControlCenterScreen extends Screen {
         }
 
         drawPlayerBar(g, font, accent, mouseX, mouseY);
-        super.extractRenderState(g, mouseX, mouseY, partialTick); // kotak teks (EditBox)
+        super.render(g, mouseX, mouseY, partialTick); // kotak teks (EditBox)
 
         if (anim) {
             g.pose().popMatrix();
         }
     }
 
-    private void drawSidebar(GuiGraphicsExtractor g, Font font, int accent, int mx, int my) {
+    private void drawSidebar(GuiGraphics g, Font font, int accent, int mx, int my) {
         Glass.roundRect(g, px + 3, py + 3, sbW - 3, ph - 6, 6, a(0x000000, 0.30f));
         GlassPanelRenderer.text(g, font, "X5", px + 10, py + 12, accent);
         if (sbW > 40) {
@@ -459,7 +459,7 @@ public final class ControlCenterScreen extends Screen {
     private int[] gearRect() { return new int[] {px + pw - 46, py + 6, 18, 18}; }
     private int[] closeRect() { return new int[] {px + pw - 26, py + 6, 18, 18}; }
 
-    private void drawTopBar(GuiGraphicsExtractor g, Font font, int accent, int mx, int my) {
+    private void drawTopBar(GuiGraphics g, Font font, int accent, int mx, int my) {
         int[] b = backRect();
         int[] f = fwdRect();
         boolean canBack = histPos > 0;
@@ -528,7 +528,7 @@ public final class ControlCenterScreen extends Screen {
         return Math.max(0, count * STEP - (listBot() - listTop()));
     }
 
-    private void drawMusicPage(GuiGraphicsExtractor g, Font font, int accent, int mx, int my, boolean clip) {
+    private void drawMusicPage(GuiGraphics g, Font font, int accent, int mx, int my, boolean clip) {
         if (wide()) {
             drawNowPlaying(g, font, accent, mx, my);
         }
@@ -617,7 +617,7 @@ public final class ControlCenterScreen extends Screen {
         }
     }
 
-    private void drawPill(GuiGraphicsExtractor g, Font font, int[] r, String label, int accent, boolean hov,
+    private void drawPill(GuiGraphics g, Font font, int[] r, String label, int accent, boolean hov,
                           boolean pressed) {
         float alpha = pressed ? 0.40f : (hov ? 0.30f : 0.20f);
         Glass.roundRect(g, r[0], r[1], r[2], r[3], 6, a(accent, alpha));
@@ -642,7 +642,7 @@ public final class ControlCenterScreen extends Screen {
         return Math.max(40, Math.min(n[2] - 8, n[3] - 80));
     }
 
-    private void drawNowPlaying(GuiGraphicsExtractor g, Font font, int accent, int mx, int my) {
+    private void drawNowPlaying(GuiGraphics g, Font font, int accent, int mx, int my) {
         int[] n = nowRect();
         Glass.roundRect(g, n[0], n[1], n[2], n[3], 8, a(0xFFFFFF, 0.05f));
         PlaylistManager.Track t = XFiveLiveClient.MUSIC.currentTrack();
@@ -679,7 +679,7 @@ public final class ControlCenterScreen extends Screen {
         icon(g, IC_HEART, hr[0] + 9, hr[1] + 9, fav ? (0xFF000000 | accent) : 0xFFB4B8C2);
     }
 
-    private static void drawPlayGlyph(GuiGraphicsExtractor g, int cx, int cy, boolean playing, int color) {
+    private static void drawPlayGlyph(GuiGraphics g, int cx, int cy, boolean playing, int color) {
         if (playing) {
             g.fill(cx - 4, cy - 5, cx - 1, cy + 5, color);
             g.fill(cx + 1, cy - 5, cx + 4, cy + 5, color);
@@ -690,7 +690,7 @@ public final class ControlCenterScreen extends Screen {
 
     // ---------- baris pengaturan ----------
 
-    private void drawRows(GuiGraphicsExtractor g, Font font, int accent, int mx, int my, boolean clip) {
+    private void drawRows(GuiGraphics g, Font font, int accent, int mx, int my, boolean clip) {
         int top = rowsTop();
         int bot = rowsBot();
         double maxScroll = Math.max(0, rowsH - (bot - top));
@@ -726,7 +726,7 @@ public final class ControlCenterScreen extends Screen {
         return Math.max(sliderX0(r, ax) + 24, ax + r.w - 10 - vw - 8);
     }
 
-    private void drawRow(GuiGraphicsExtractor g, Font font, int accent, Row r, int ax, int ay, int mx, int my) {
+    private void drawRow(GuiGraphics g, Font font, int accent, Row r, int ax, int ay, int mx, int my) {
         if (r.kind == Row.NOTE) {
             GlassPanelRenderer.text(g, font, GlassPanelRenderer.fit(font, r.label, r.w - 8), ax + 4, ay + 4,
                     GlassPanelRenderer.MUTED);
@@ -829,7 +829,7 @@ public final class ControlCenterScreen extends Screen {
 
     private boolean showVolume() { return pw >= 380; }
 
-    private void drawPlayerBar(GuiGraphicsExtractor g, Font font, int accent, int mx, int my) {
+    private void drawPlayerBar(GuiGraphics g, Font font, int accent, int mx, int my) {
         int by = py + ph - BOT_H;
         // garis pemisah halus
         g.fill(px + 6, by - 1, px + pw - 6, by, a(0xFFFFFF, 0.06f));
@@ -908,7 +908,7 @@ public final class ControlCenterScreen extends Screen {
         }
     }
 
-    private void drawBtnBg(GuiGraphicsExtractor g, int[] r, int mx, int my, String key) {
+    private void drawBtnBg(GuiGraphics g, int[] r, int mx, int my, String key) {
         boolean pressed = pressedKey.equals(key);
         if (pressed) {
             Glass.disc(g, r[0] + r[2] / 2, r[1] + r[3] / 2, 9, a(0xFFFFFF, 0.14f));
@@ -928,7 +928,7 @@ public final class ControlCenterScreen extends Screen {
         return new int[] {width / 2 - 70, height - 30, 140, 20};
     }
 
-    private void drawHudEdit(GuiGraphicsExtractor g, Font font, int mx, int my) {
+    private void drawHudEdit(GuiGraphics g, Font font, int mx, int my) {
         int accent = accent();
         drawHudPreviews(g, font, accent);
         int[] d = doneRect();
@@ -937,7 +937,7 @@ public final class ControlCenterScreen extends Screen {
         drawPill(g, font, d, "Done", accent, in(mx, my, d), false);
     }
 
-    private void drawHudPreviews(GuiGraphicsExtractor g, Font font, int accent) {
+    private void drawHudPreviews(GuiGraphics g, Font font, int accent) {
         int[] island = DynamicIslandHud.box();
         int[] music = com.xfive.live.hud.MusicHud.box();
         int[] lyrics = com.xfive.live.hud.LyricsHud.box();
@@ -972,7 +972,7 @@ public final class ControlCenterScreen extends Screen {
         outline(g, lx, ly, lw, lh, a(c.highlightColor, 0.9f));
     }
 
-    private static void outline(GuiGraphicsExtractor g, int x, int y, int w, int h, int color) {
+    private static void outline(GuiGraphics g, int x, int y, int w, int h, int color) {
         g.fill(x - 2, y - 2, x + w + 2, y, color);
         g.fill(x - 2, y + h, x + w + 2, y + h + 2, color);
         g.fill(x - 2, y, x, y + h, color);

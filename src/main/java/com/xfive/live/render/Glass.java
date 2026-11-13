@@ -1,6 +1,6 @@
 package com.xfive.live.render;
 
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 
 /**
  * Gambar panel gelap yang elegan dan ringan: hanya beberapa fill per panel (tanpa gradien per baris,
@@ -44,7 +44,7 @@ public final class Glass {
      * Persegi membulat dua nada (warna atas di separuh atas, warna bawah di separuh bawah).
      * Hanya baris sudut yang digambar satu per satu, bagian tengah cukup satu atau dua fill.
      */
-    public static void roundRect(GuiGraphicsExtractor g, int x, int y, int w, int h, int r, int top, int bottom) {
+    public static void roundRect(GuiGraphics g, int x, int y, int w, int h, int r, int top, int bottom) {
         if (w <= 0 || h <= 0) {
             return;
         }
@@ -69,12 +69,12 @@ public final class Glass {
         }
     }
 
-    public static void roundRect(GuiGraphicsExtractor g, int x, int y, int w, int h, int r, int argb) {
+    public static void roundRect(GuiGraphics g, int x, int y, int w, int h, int r, int argb) {
         roundRect(g, x, y, w, h, r, argb, argb);
     }
 
     /** Garis tepi 1 piksel mengikuti sudut membulat (warna atas untuk separuh atas, bawah untuk separuh bawah). */
-    public static void border(GuiGraphicsExtractor g, int x, int y, int w, int h, int r, int top, int bottom) {
+    public static void border(GuiGraphics g, int x, int y, int w, int h, int r, int top, int bottom) {
         if (w <= 2 || h <= 2) {
             return;
         }
@@ -107,7 +107,7 @@ public final class Glass {
         }
     }
 
-    public static void disc(GuiGraphicsExtractor g, int cx, int cy, int r, int argb) {
+    public static void disc(GuiGraphics g, int cx, int cy, int r, int argb) {
         for (int dy = -r; dy <= r; dy++) {
             int half = Math.round((float) Math.sqrt(Math.max(0, r * r - dy * dy)));
             g.fill(cx - half, cy + dy, cx + half + 1, cy + dy + 1, argb);
@@ -118,7 +118,7 @@ public final class Glass {
      * Panel gelap elegan: badan dua nada (biru gelap ke hampir hitam), garis kilau tipis di tepi atas,
      * garis aksen tipis di bawah, dan tepi halus. Sekitar 30 fill saja.
      */
-    public static void panel(GuiGraphicsExtractor g, int x, int y, int w, int h, int r, float alpha, int accent) {
+    public static void panel(GuiGraphics g, int x, int y, int w, int h, int r, float alpha, int accent) {
         if (alpha <= 0.01f || w <= 2 || h <= 2) {
             return;
         }
