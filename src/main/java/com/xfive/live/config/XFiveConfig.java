@@ -48,6 +48,14 @@ public final class XFiveConfig {
     public int highlightColor = 0x40DFFF;
     public int lyricsPosition = 2; // 0 = atas, 1 = tengah, 2 = bawah
     public boolean lyricsMinimal = false;
+    /** Animasi baris aktif, lihat LyricStyle.IDS. */
+    public String lyricsAnim = "fade";
+    /** Sorot karaoke: huruf terisi warna sorot sesuai waktu nyanyi. */
+    public boolean lyricsKaraoke = true;
+    /** Tampilkan baris sebelumnya dan berikutnya (redup). */
+    public boolean lyricsPreview = true;
+    /** Geser sinkron lirik dalam ms (-3000..3000). Plus = lirik muncul lebih lambat. */
+    public int lyricsOffsetMs = 0;
 
     // Appearance
     public String theme = "purple"; // lihat Themes.IDS
@@ -55,6 +63,8 @@ public final class XFiveConfig {
     public String themeStyle = "glass";
     public float customTransparency = 0.85f;
     public boolean animations = true;
+    /** Font UI, lihat Fonts.IDS. */
+    public String uiFont = "default";
 
     /**
      * Posisi HUD per komponen: musicHud, dynamicIsland, lyricsHud. Nilai = {x, y}.
@@ -120,11 +130,16 @@ public final class XFiveConfig {
         highlightColor = integer(p, "lyrics.highlightColor", highlightColor, 0, 0xFFFFFF);
         lyricsPosition = integer(p, "lyrics.position", lyricsPosition, 0, 2);
         lyricsMinimal = bool(p, "lyrics.minimal", lyricsMinimal);
+        lyricsAnim = com.xfive.live.lyrics.LyricStyle.normalize(p.getProperty("lyrics.anim", lyricsAnim));
+        lyricsKaraoke = bool(p, "lyrics.karaoke", lyricsKaraoke);
+        lyricsPreview = bool(p, "lyrics.preview", lyricsPreview);
+        lyricsOffsetMs = integer(p, "lyrics.offsetMs", lyricsOffsetMs, -3000, 3000);
 
         theme = Themes.normalize(p.getProperty("appearance.theme", theme));
         themeStyle = "dark_music".equals(p.getProperty("appearance.style", themeStyle).strip()) ? "dark_music" : "glass";
         customTransparency = flt(p, "appearance.transparency", customTransparency, 0.1f, 1f);
         animations = bool(p, "appearance.animations", animations);
+        uiFont = Fonts.normalize(p.getProperty("appearance.font", uiFont));
 
         for (String key : hudPositions.keySet()) {
             int[] pos = hudPositions.get(key);
@@ -164,11 +179,16 @@ public final class XFiveConfig {
         put(p, "lyrics.highlightColor", highlightColor);
         put(p, "lyrics.position", lyricsPosition);
         put(p, "lyrics.minimal", lyricsMinimal);
+        put(p, "lyrics.anim", lyricsAnim);
+        put(p, "lyrics.karaoke", lyricsKaraoke);
+        put(p, "lyrics.preview", lyricsPreview);
+        put(p, "lyrics.offsetMs", lyricsOffsetMs);
 
         put(p, "appearance.theme", theme);
         put(p, "appearance.style", themeStyle);
         put(p, "appearance.transparency", customTransparency);
         put(p, "appearance.animations", animations);
+        put(p, "appearance.font", uiFont);
 
         for (Map.Entry<String, int[]> e : hudPositions.entrySet()) {
             put(p, "hud." + e.getKey() + ".x", e.getValue()[0]);

@@ -3,6 +3,11 @@ package com.xfive.live.render;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
 
 /**
  * Panel gaya glassmorphism: latar gelap transparan dengan garis neon tipis.
@@ -49,8 +54,60 @@ public final class GlassPanelRenderer {
         }
     }
 
+    private static final java.util.HashMap<String, Component> CACHE = new java.util.HashMap<>();
+    private static String cachedFont = "";
+
+    /** Teks dengan font pilihan pengguna (atau bawaan). Komponen di-cache supaya tidak membuat objek tiap frame. */
+    private static Component styled(String s) {
+        String id = com.xfive.live.XFiveLiveClient.CONFIG.uiFont;
+        if (!id.equals(cachedFont)) {
+            CACHE.clear();
+            cachedFont = id;
+        }
+        Component c = CACHE.get(s);
+        if (c == null) {
+            if (CACHE.size() > 600) {
+                CACHE.clear();
+            }
+            MutableComponent m = Component.literal(s);
+            if (!"default".equals(id)) {
+                m.setStyle(Style.EMPTY.withFont(new FontDescription.Resource(
+                        Identifier.fromNamespaceAndPath("xfive-live", id))));
+            }
+            c = m;
+            CACHE.put(s, c);
+        }
+        return c;
+    }
+
     public static void text(GuiGraphicsExtractor g, Font font, String s, int x, int y, int rgb) {
-        g.text(font, s, x, y, 0xFF000000 | (rgb & 0xFFFFFF), true);
+        g.text(font, styled(s), x, y, 0xFF000000 | (rgb & 0xFFFFFF), true);
+    }
+
+    /** Seperti text() tetapi dengan transparansi (0..1). Alpha terlalu kecil dibulatkan agar tidak dianggap opak. */
+    public static void textAlpha(GuiGraphicsExtractor g, Font font, String s, int x, int y, int rgb, float alpha) {
+        int a = Math.round(Math.max(0f, Math.min(1f, alpha)) * 255f);
+        if (a < 8) {
+            return;
+        }
+        g.text(font, styled(s), x, y, (a << 24) | (rgb & 0xFFFFFF), true);
+    }
+
+    /** Lebar teks dalam piksel dengan font yang sama seperti text(). */
+    public static int width(Font font, String s) {
+        return font.width(styled(s));
+    }
+
+    /** Memotong teks dengan "..." agar muat dalam maxPx piksel. */
+    public static String fit(Font font, String s, int maxPx) {
+        if (width(font, s) <= maxPx) {
+            return s;
+        }
+        String t = s;
+        while (t.length() > 1 && width(font, t + "...") > maxPx) {
+            t = t.substring(0, t.length() - 1);
+        }
+        return t + "...";
     }
 
     public static String trim(String s, int max) {

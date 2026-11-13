@@ -235,7 +235,7 @@ public final class DynamicIslandHud {
             String left = formatTime(posMs);
             String right = formatTime(durMs);
             GlassPanelRenderer.text(g, font, left, bx1, y + u(60, s) + dy, GlassPanelRenderer.MUTED);
-            GlassPanelRenderer.text(g, font, right, bx2 - font.width(right), y + u(60, s) + dy,
+            GlassPanelRenderer.text(g, font, right, bx2 - GlassPanelRenderer.width(font, right), y + u(60, s) + dy,
                     GlassPanelRenderer.MUTED);
         }
 
@@ -390,14 +390,7 @@ public final class DynamicIslandHud {
     }
 
     private static String fit(Font font, String s, int maxPx) {
-        if (font.width(s) <= maxPx) {
-            return s;
-        }
-        String t = s;
-        while (t.length() > 1 && font.width(t + "…") > maxPx) {
-            t = t.substring(0, t.length() - 1);
-        }
-        return t + "…";
+        return GlassPanelRenderer.fit(font, s, maxPx);
     }
 
     private static String formatTime(long ms) {

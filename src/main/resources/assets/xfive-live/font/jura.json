@@ -1,0 +1,6 @@
+{
+  "providers": [
+    {"type": "ttf", "file": "xfive-live:jura.ttf", "size": 10.5, "oversample": 6.0, "shift": [0.0, 0.5], "skip": ""},
+    {"type": "reference", "id": "minecraft:default"}
+  ]
+}

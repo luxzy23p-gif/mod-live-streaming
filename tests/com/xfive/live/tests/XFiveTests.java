@@ -35,6 +35,7 @@ public final class XFiveTests {
         testConfig(work.resolve("config"));
         testThemes();
         testLrclib();
+        testLyricStyle(work.resolve("lyricstyle"));
         System.out.println("passed=" + passed + " failed=" + failed);
         if (failed > 0) {
             System.exit(1);
@@ -189,5 +190,40 @@ public final class XFiveTests {
         LyricsManager m = new LyricsManager();
         m.load(got);
         check("lrclib parses into lines", m.lines().size() == 2);
+    }
+
+    static void testLyricStyle(Path dir) throws Exception {
+        check("anim indexOf default", com.xfive.live.lyrics.LyricStyle.indexOf("???") == 0);
+        check("anim next wraps", com.xfive.live.lyrics.LyricStyle.next("none").equals("fade"));
+        check("anim enter start 0", com.xfive.live.lyrics.LyricStyle.enter(0, true) == 0f);
+        check("anim enter end 1", com.xfive.live.lyrics.LyricStyle.enter(1000, true) == 1f);
+        check("anim off is 1", com.xfive.live.lyrics.LyricStyle.enter(0, false) == 1f);
+        check("pop settles at 1", com.xfive.live.lyrics.LyricStyle.popScale(1f) == 1f);
+        float p0 = com.xfive.live.lyrics.LyricStyle.popScale(0f);
+        check("pop starts small", p0 >= 0.69f && p0 <= 0.8f);
+        java.util.List<LyricLine> ls = java.util.List.of(new LyricLine(1000, "a"), new LyricLine(4000, "b"));
+        check("line duration", com.xfive.live.lyrics.LyricStyle.lineDuration(ls, 0) == 3000);
+        check("last line duration", com.xfive.live.lyrics.LyricStyle.lineDuration(ls, 1) == 4000);
+        check("karaoke half", Math.abs(com.xfive.live.lyrics.LyricStyle.karaoke(1275, 3000) - 0.5f) < 0.01f);
+        check("karaoke done", com.xfive.live.lyrics.LyricStyle.karaoke(9999, 3000) == 1f);
+        check("typed none at 0", com.xfive.live.lyrics.LyricStyle.typedChars(10, 0, 3000) == 0);
+        check("typed all later", com.xfive.live.lyrics.LyricStyle.typedChars(10, 5000, 3000) == 10);
+        check("shifted floor", com.xfive.live.lyrics.LyricStyle.shifted(100, -500) == 0);
+        Files.createDirectories(dir);
+        XFiveConfig a = new XFiveConfig(dir);
+        a.lyricsAnim = "pop";
+        a.lyricsKaraoke = false;
+        a.lyricsPreview = false;
+        a.lyricsOffsetMs = -250;
+        a.save();
+        XFiveConfig b = new XFiveConfig(dir);
+        b.load();
+        check("config lyric anim saved", b.lyricsAnim.equals("pop") && !b.lyricsKaraoke && !b.lyricsPreview
+                && b.lyricsOffsetMs == -250);
+        Files.writeString(dir.resolve(XFiveConfig.FILE_NAME), "lyrics.anim=zzz\nlyrics.offsetMs=99999\n");
+        XFiveConfig c = new XFiveConfig(dir);
+        c.load();
+        check("config bad anim falls back", c.lyricsAnim.equals("fade"));
+        check("config offset clamped", c.lyricsOffsetMs == 3000);
     }
 }
