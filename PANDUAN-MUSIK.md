@@ -23,7 +23,11 @@ Kalau folder itu belum ada, buat sendiri dengan nama persis `xfive-music` (huruf
 2. Format yang didukung: **.mp3**, **.m4a**, **.ogg**, dan **.wav**.
 3. Beri nama file dengan pola **Artis - Judul.mp3**, misalnya `Adele - Hello.mp3`.
    Dengan pola ini, nama artis dan judul tampil di HUD.
-4. (Opsional) Lirik bisa ditaruh di file **Artis - Judul.lrc** di folder yang sama.
+4. Lirik: kalau tidak ada file lirik, mod mengunduh lirik bersinkron **otomatis** dari lrclib.net saat lagu diputar
+   (perlu internet; hasilnya disimpan di folder `xfive-lirik`). Bisa dimatikan di **Settings > Auto-download lyrics**.
+   Kalau mau lirik sendiri, taruh file **Artis - Judul.lrc** di folder yang sama dengan lagu atau di `xfive-lirik`.
+5. Tampilan lirik diatur di halaman **Custom HUD**: animasi baris (Fade, Rise, Drop, Pop, Typewriter),
+   sorot karaoke, baris sebelumnya/berikutnya, posisi, dan **Lyrics sync** untuk menggeser waktu kalau lirik terlalu cepat/lambat.
 
 ### Cara memasukkan lagu dari file ZIP
 
