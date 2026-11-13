@@ -64,6 +64,7 @@ public final class ControlCenterScreen extends Screen {
 
     /** Opens the unified music library/player directly from the single music-center keybind. */
     public static ControlCenterScreen audio() {
+        XFiveLiveClient.playUiSound();
         return new ControlCenterScreen(Page.AUDIO);
     }
 
@@ -868,7 +869,7 @@ public final class ControlCenterScreen extends Screen {
         return Button.builder(Component.literal(label), b -> action.run()).bounds(x, y, w, h).build();
     }
 
-    @Override public void onClose() { XFiveLiveClient.CONFIG.save(); super.onClose(); }
+    @Override public void onClose() { XFiveLiveClient.CONFIG.save(); XFiveLiveClient.playUiSound(); super.onClose(); }
     @Override public boolean isPauseScreen() { return false; }
 
     private static final class VolumeSlider extends AbstractSliderButton {

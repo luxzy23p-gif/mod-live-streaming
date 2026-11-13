@@ -18,6 +18,10 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 
@@ -35,6 +39,8 @@ import java.util.List;
  */
 public final class XFiveLiveClient implements ClientModInitializer {
     public static final String MOD_ID = "xfive-live";
+    private static final Identifier UI_SOUND_ID = Identifier.fromNamespaceAndPath(MOD_ID, "ui.notification");
+    private static final SoundEvent UI_SOUND = SoundEvent.createVariableRangeEvent(UI_SOUND_ID);
     public static final XFiveConfig CONFIG = new XFiveConfig(FabricLoader.getInstance().getConfigDir());
     public static final MusicManager MUSIC = new MusicManager();
     public static final LyricsManager LYRICS = new LyricsManager();
@@ -46,6 +52,14 @@ public final class XFiveLiveClient implements ClientModInitializer {
             "# Contoh file:   /storage/emulated/0/Download/lagu.mp3",
             "# Baris yang diawali tanda # diabaikan.",
             "");
+
+    /** Memutar efek UI untuk membuka/menutup Music Center. */
+    public static void playUiSound() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc != null && mc.getSoundManager() != null) {
+            mc.getSoundManager().play(SimpleSoundInstance.forUI(UI_SOUND, 1.0F));
+        }
+    }
 
     /** Folder musik yang sedang dipakai, ditampilkan di menu pengaturan. */
     public static Path musicFolder = null;
@@ -59,6 +73,7 @@ public final class XFiveLiveClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        Registry.register(BuiltInRegistries.SOUND_EVENT, UI_SOUND_ID, UI_SOUND);
         CONFIG.load();
         reloadMusic();
         ensureLyricsFolder();
