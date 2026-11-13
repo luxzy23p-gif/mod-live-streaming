@@ -26,8 +26,8 @@ Kalau folder itu belum ada, buat sendiri dengan nama persis `xfive-music` (huruf
 4. Lirik: kalau tidak ada file lirik, mod mengunduh lirik bersinkron **otomatis** dari lrclib.net saat lagu diputar
    (perlu internet; hasilnya disimpan di folder `xfive-lirik`). Bisa dimatikan di **Settings > Auto-download lyrics**.
    Kalau mau lirik sendiri, taruh file **Artis - Judul.lrc** di folder yang sama dengan lagu atau di `xfive-lirik`.
-5. Tampilan lirik diatur di halaman **Custom HUD**: animasi baris (Fade, Rise, Drop, Pop, Typewriter),
-   sorot karaoke, baris sebelumnya/berikutnya, posisi, dan **Lyrics sync** untuk menggeser waktu kalau lirik terlalu cepat/lambat.
+5. Tampilan lirik diatur di halaman **Custom HUD**: animasi baris (Fade, Rise, Drop, Pop, Typewriter, Words, Wave),
+   sorot karaoke, baris sebelumnya/berikutnya, titik hitung mundur saat musik instrumental (**Instrumental dots**), posisi, dan **Lyrics sync** untuk menggeser waktu kalau lirik terlalu cepat/lambat.
 
 ### Cara memasukkan lagu dari file ZIP
 
