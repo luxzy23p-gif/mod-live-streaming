@@ -209,6 +209,30 @@ public final class XFiveTests {
         check("typed none at 0", com.xfive.live.lyrics.LyricStyle.typedChars(10, 0, 3000) == 0);
         check("typed all later", com.xfive.live.lyrics.LyricStyle.typedChars(10, 5000, 3000) == 10);
         check("shifted floor", com.xfive.live.lyrics.LyricStyle.shifted(100, -500) == 0);
+        check("anim ids/names same length", com.xfive.live.lyrics.LyricStyle.IDS.length == com.xfive.live.lyrics.LyricStyle.NAMES.length);
+        check("anim wave known", "wave".equals(com.xfive.live.lyrics.LyricStyle.normalize("wave")));
+        check("anim words known", "words".equals(com.xfive.live.lyrics.LyricStyle.normalize("words")));
+        check("first words 2", com.xfive.live.lyrics.LyricStyle.firstWords("halo dunia yang indah", 2).equals("halo dunia"));
+        check("first words 0", com.xfive.live.lyrics.LyricStyle.firstWords("halo dunia", 0).isEmpty());
+        check("first words all", com.xfive.live.lyrics.LyricStyle.firstWords("halo dunia", 9).equals("halo dunia"));
+        check("revealed words none", com.xfive.live.lyrics.LyricStyle.revealedWords(4, 0, 3000) == 0);
+        check("revealed words all", com.xfive.live.lyrics.LyricStyle.revealedWords(4, 9000, 3000) == 4);
+        check("wave char start", com.xfive.live.lyrics.LyricStyle.waveChar(0, 10, 0) == 0f);
+        check("wave char later letter waits", com.xfive.live.lyrics.LyricStyle.waveChar(9, 10, 100) == 0f);
+        check("wave char done", com.xfive.live.lyrics.LyricStyle.waveChar(9, 10, 5000) == 1f);
+        check("wave total positive", com.xfive.live.lyrics.LyricStyle.waveTotalMs(10) > 260);
+        java.util.List<com.xfive.live.lyrics.LyricLine> gap = java.util.List.of(
+                new com.xfive.live.lyrics.LyricLine(8000, "a"),
+                new com.xfive.live.lyrics.LyricLine(30000, "b"),
+                new com.xfive.live.lyrics.LyricLine(33000, "c"));
+        check("countdown intro", com.xfive.live.lyrics.LyricStyle.countdown(gap, -1, 4000) == 0.5f);
+        check("countdown holds line first", com.xfive.live.lyrics.LyricStyle.countdown(gap, 0, 10000) < 0f);
+        check("countdown in gap", com.xfive.live.lyrics.LyricStyle.countdown(gap, 0, 21000) > 0.4f
+                && com.xfive.live.lyrics.LyricStyle.countdown(gap, 0, 21000) < 0.6f);
+        check("countdown short gap none", com.xfive.live.lyrics.LyricStyle.countdown(gap, 1, 31500) < 0f);
+        check("countdown last line none", com.xfive.live.lyrics.LyricStyle.countdown(gap, 2, 40000) < 0f);
+        check("countdown short intro none", com.xfive.live.lyrics.LyricStyle.countdown(
+                java.util.List.of(new com.xfive.live.lyrics.LyricLine(2000, "x")), -1, 500) < 0f);
         Files.createDirectories(dir);
         XFiveConfig a = new XFiveConfig(dir);
         a.lyricsAnim = "pop";

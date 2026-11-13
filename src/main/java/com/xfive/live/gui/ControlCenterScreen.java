@@ -1107,6 +1107,7 @@ public final class ControlCenterScreen extends Screen {
                         () -> c.lyricsAnim = LyricStyle.next(c.lyricsAnim)));
                 out.add(toggle("Karaoke highlight", () -> c.lyricsKaraoke, () -> c.lyricsKaraoke = !c.lyricsKaraoke));
                 out.add(toggle("Prev/next lines", () -> c.lyricsPreview, () -> c.lyricsPreview = !c.lyricsPreview));
+                out.add(toggle("Instrumental dots", () -> c.lyricsCountdown, () -> c.lyricsCountdown = !c.lyricsCountdown));
                 out.add(cycle("Lyrics position", () -> new String[] {"Top", "Middle", "Bottom"}[c.lyricsPosition],
                         () -> c.lyricsPosition = (c.lyricsPosition + 1) % 3));
                 out.add(slider("Lyrics sync", () -> (c.lyricsOffsetMs + 3000) / 6000.0,
