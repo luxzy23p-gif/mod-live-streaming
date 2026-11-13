@@ -44,7 +44,8 @@ public final class LyricsHud {
         }
         long songPos = LyricStyle.shifted(XFiveLiveClient.MUSIC.positionMs(), c.lyricsOffsetMs);
         int idx = ly.indexAt(songPos);
-        if (idx < 0) {
+        float countdown = c.lyricsCountdown ? LyricStyle.countdown(ly.lines(), idx, songPos) : -1f;
+        if (idx < 0 && countdown < 0f) {
             return;
         }
         Font font = GlassPanelRenderer.font();
@@ -69,9 +70,13 @@ public final class LyricsHud {
             drawCentered(g, font, ly.textAt(idx - 1), cx, baseY, GlassPanelRenderer.MUTED);
             drawCentered(g, font, ly.textAt(idx + 1), cx, baseY + lineH * 2, GlassPanelRenderer.MUTED);
         }
-        long since = songPos - ly.lines().get(idx).timeMs();
-        drawActive(g, font, ly.textAt(idx), cx, baseY + lineH, highlight, c,
-                since, LyricStyle.lineDuration(ly.lines(), idx));
+        if (countdown >= 0f) {
+            drawCountdown(g, cx, baseY + lineH, highlight, countdown);
+        } else {
+            long since = songPos - ly.lines().get(idx).timeMs();
+            drawActive(g, font, ly.textAt(idx), cx, baseY + lineH, highlight, c,
+                    since, LyricStyle.lineDuration(ly.lines(), idx));
+        }
         if (!c.lyricsMinimal) {
             int w = Math.min(sw - 16, WIDTH);
             g.fill(cx - w / 2, baseY - 4, cx + w / 2, baseY - 3, GlassPanelRenderer.argb(accent, alpha));
@@ -123,6 +128,16 @@ public final class LyricsHud {
                 alpha = Math.min(1f, e * 1.6f);
             }
             case "typewriter" -> shown = full.substring(0, LyricStyle.typedChars(full.length(), since, dur));
+            case "words" -> {
+                String[] parts = full.strip().split("\\s+");
+                shown = LyricStyle.firstWords(full, LyricStyle.revealedWords(parts.length, since, dur));
+            }
+            case "wave" -> {
+                if (since < LyricStyle.waveTotalMs(full.length())) {
+                    drawWave(g, font, full, cx, y, hl, since);
+                    return;
+                }
+            }
             default -> {
             }
         }
@@ -150,6 +165,41 @@ public final class LyricsHud {
         }
         if (pop) {
             g.pose().popMatrix();
+        }
+    }
+
+    /** Animasi gelombang: huruf jatuh masuk satu per satu. Hanya dipakai sebentar saat baris baru muncul. */
+    private static void drawWave(GuiGraphics g, Font font, String full, int cx, int y, int hl, long since) {
+        int x0 = cx - GlassPanelRenderer.width(font, full) / 2;
+        int n = full.length();
+        for (int i = 0; i < n; i++) {
+            char ch = full.charAt(i);
+            if (ch == ' ') {
+                continue;
+            }
+            float t = LyricStyle.waveChar(i, n, since);
+            if (t <= 0f) {
+                continue;
+            }
+            int x = x0 + GlassPanelRenderer.width(font, full.substring(0, i));
+            int dy = Math.round((1f - t) * -9f);
+            GlassPanelRenderer.textAlpha(g, font, String.valueOf(ch), x, y + dy, hl, t);
+        }
+    }
+
+    /** Tiga titik yang terisi satu per satu selama jeda instrumental. */
+    private static void drawCountdown(GuiGraphics g, int cx, int y, int hl, float progress) {
+        int size = 5;
+        int gap = 5;
+        int total = 3 * size + 2 * gap;
+        int x0 = cx - total / 2;
+        for (int i = 0; i < 3; i++) {
+            float fill = Math.max(0f, Math.min(1f, progress * 3f - i));
+            int x = x0 + i * (size + gap);
+            g.fill(x, y + 2, x + size, y + 2 + size, GlassPanelRenderer.argb(0xFFFFFF, 0.22f));
+            if (fill > 0f) {
+                g.fill(x, y + 2, x + size, y + 2 + size, GlassPanelRenderer.argb(hl, 0.35f + 0.65f * fill));
+            }
         }
     }
 
