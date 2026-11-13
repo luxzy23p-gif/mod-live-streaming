@@ -70,3 +70,9 @@ File: `config/xfive-live.properties` (dibuat otomatis saat pertama kali disimpan
 | F9 | Tampilkan/sembunyikan lirik |
 
 Tombol ini terdaftar sebagai keybind Minecraft, sehingga bisa diubah di Controls.
+
+## Versi Minecraft
+
+- Cabang `main`: Minecraft **26.2** (Java 25).
+- Cabang `mc-1.21.11`: Minecraft **1.21.11** (Java 21, Fabric Loader 0.20.1). Jar-nya bernama `XFiveLive-mc1.21.11-...jar`.
+- Kedua cabang dibangun otomatis oleh GitHub Actions; ambil jar dari menu **Actions > Artifacts**.
