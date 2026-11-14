@@ -101,6 +101,7 @@ public final class XFiveLiveClient implements ClientModInitializer {
                     } else {
                         MusicHud.render(graphics);
                     }
+                    com.xfive.live.hud.SpecHud.render(graphics);
                     LyricsHud.render(graphics);
                 });
 
