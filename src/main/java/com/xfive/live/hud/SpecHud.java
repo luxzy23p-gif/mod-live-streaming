@@ -7,7 +7,7 @@ import com.xfive.live.music.PlaylistManager;
 import com.xfive.live.render.GlassPanelRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 
 import java.util.List;
 
@@ -74,7 +74,7 @@ public final class SpecHud {
         return new int[] {x, y, w, h};
     }
 
-    public static void render(GuiGraphicsExtractor g) {
+    public static void render(GuiGraphics g) {
         XFiveConfig c = XFiveLiveClient.CONFIG;
         long now = System.currentTimeMillis();
         long ns = System.nanoTime();
@@ -163,7 +163,7 @@ public final class SpecHud {
     }
 
     /** Ikon HP bergaris (tanpa isi): chip kecil dan dua batang memori di dalamnya. */
-    private static void drawPhone(GuiGraphicsExtractor g, int x, int y, int accent, float alpha, long sinceMs) {
+    private static void drawPhone(GuiGraphics g, int x, int y, int accent, float alpha, long sinceMs) {
         int line = GlassPanelRenderer.argb(0xFFFFFF, alpha);
         int w = ICON_W;
         int h = ICON_H;
