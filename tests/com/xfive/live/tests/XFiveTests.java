@@ -36,6 +36,7 @@ public final class XFiveTests {
         testThemes();
         testLrclib();
         testLyricStyle(work.resolve("lyricstyle"));
+        testSpecCard();
         System.out.println("passed=" + passed + " failed=" + failed);
         if (failed > 0) {
             System.exit(1);
@@ -249,5 +250,22 @@ public final class XFiveTests {
         c.load();
         check("config bad anim falls back", c.lyricsAnim.equals("fade"));
         check("config offset clamped", c.lyricsOffsetMs == 3000);
+    }
+
+    static void testSpecCard() {
+        check("spec lines split", com.xfive.live.config.SpecCard.lines("RAM 8 GB|  | ROM 256 GB ").equals(java.util.List.of("RAM 8 GB", "ROM 256 GB")));
+        check("spec lines max 4", com.xfive.live.config.SpecCard.lines("a|b|c|d|e|f").size() == 4);
+        check("spec lines null", com.xfive.live.config.SpecCard.lines(null).isEmpty());
+        check("spec clean empty falls back", com.xfive.live.config.SpecCard.clean("   ", "x").equals("x"));
+        check("spec clean strips control", com.xfive.live.config.SpecCard.clean("a\tb", "x").equals("ab"));
+        check("spec clean limit", com.xfive.live.config.SpecCard.clean("z".repeat(200), "x").length() == 60);
+        String[] t = com.xfive.live.config.SpecCard.splitTitle("Dimensity 8350");
+        check("spec title head", t[0].equals("Dimensity ") && t[1].equals("8350"));
+        String[] one = com.xfive.live.config.SpecCard.splitTitle("Chip");
+        check("spec title one word", one[0].isEmpty() && one[1].equals("Chip"));
+        check("spec mode clamp", com.xfive.live.config.SpecCard.mode(9) == 2 && com.xfive.live.config.SpecCard.mode(-3) == 0);
+        check("spec typed none", com.xfive.live.config.SpecCard.typedCount(10, -5, 50) == 0);
+        check("spec typed part", com.xfive.live.config.SpecCard.typedCount(10, 100, 50) == 5);
+        check("spec typed all", com.xfive.live.config.SpecCard.typedCount(10, 9000, 50) == 10);
     }
 }

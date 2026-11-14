@@ -58,6 +58,15 @@ public final class XFiveConfig {
     /** Geser sinkron lirik dalam ms (-3000..3000). Plus = lirik muncul lebih lambat. */
     public int lyricsOffsetMs = 0;
 
+    // Kartu spesifikasi (transparan, di bawah tampilan lagu)
+    /** 0 = mati, 1 = otomatis saat lagu mulai atau berganti, 2 = selalu tampil. */
+    public int specMode = 1;
+    public int specSec = 8;
+    public String specTitle = "Dimensity 8350";
+    public String specTag = "ULTIMATE";
+    /** Baris spesifikasi dipisah tanda "|". */
+    public String specLines = "RAM 8 GB, ROM 256 GB|Minecraft Java 26.2 + X FIVE LIVE";
+
     // Appearance
     public String theme = "purple"; // lihat Themes.IDS
     /** UI skin: glass (Liquid Glass Lite) atau dark_music (matte music-player style). */
@@ -89,6 +98,7 @@ public final class XFiveConfig {
         hudPositions.put("musicHud", new int[] {8, 8});
         hudPositions.put("dynamicIsland", new int[] {-1, -1});
         hudPositions.put("lyricsHud", new int[] {-1, -1});
+        hudPositions.put("specHud", new int[] {-1, -1});
     }
 
     public void load() {
@@ -135,6 +145,12 @@ public final class XFiveConfig {
         lyricsPreview = bool(p, "lyrics.preview", lyricsPreview);
         lyricsCountdown = bool(p, "lyrics.countdown", lyricsCountdown);
         lyricsOffsetMs = integer(p, "lyrics.offsetMs", lyricsOffsetMs, -3000, 3000);
+
+        specMode = SpecCard.mode(integer(p, "spec.mode", specMode, 0, 2));
+        specSec = integer(p, "spec.sec", specSec, 3, 30);
+        specTitle = SpecCard.clean(p.getProperty("spec.title"), specTitle);
+        specTag = SpecCard.clean(p.getProperty("spec.tag"), specTag);
+        specLines = p.containsKey("spec.lines") ? p.getProperty("spec.lines").replaceAll("[\\p{Cntrl}]", "") : specLines;
 
         theme = Themes.normalize(p.getProperty("appearance.theme", theme));
         themeStyle = "dark_music".equals(p.getProperty("appearance.style", themeStyle).strip()) ? "dark_music" : "glass";
@@ -184,6 +200,12 @@ public final class XFiveConfig {
         put(p, "lyrics.preview", lyricsPreview);
         put(p, "lyrics.countdown", lyricsCountdown);
         put(p, "lyrics.offsetMs", lyricsOffsetMs);
+
+        put(p, "spec.mode", specMode);
+        put(p, "spec.sec", specSec);
+        put(p, "spec.title", specTitle);
+        put(p, "spec.tag", specTag);
+        put(p, "spec.lines", specLines);
 
         put(p, "appearance.theme", theme);
         put(p, "appearance.style", themeStyle);

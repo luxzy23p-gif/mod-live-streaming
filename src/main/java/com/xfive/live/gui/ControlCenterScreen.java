@@ -970,6 +970,10 @@ public final class ControlCenterScreen extends Screen {
                     ly + 3 + i * lineH, color);
         }
         outline(g, lx, ly, lw, lh, a(c.highlightColor, 0.9f));
+
+        int[] spec = com.xfive.live.hud.SpecHud.box();
+        GlassPanelRenderer.text(g, font, "SPEC CARD PREVIEW", spec[0] + 20, spec[1] + 2, 0xFFFFFF);
+        outline(g, spec[0], spec[1], spec[2], spec[3], a(accent, 0.9f));
     }
 
     private static void outline(GuiGraphics g, int x, int y, int w, int h, int color) {
@@ -1103,6 +1107,10 @@ public final class ControlCenterScreen extends Screen {
                 out.add(toggle("Music HUD", () -> c.enableMusic, () -> c.enableMusic = !c.enableMusic));
                 out.add(toggle("Dynamic Island", () -> c.dynamicIsland, () -> c.dynamicIsland = !c.dynamicIsland));
                 out.add(toggle("Lyrics HUD", () -> c.enableLyrics, () -> c.enableLyrics = !c.enableLyrics));
+                out.add(cycle("Spec card", () -> com.xfive.live.config.SpecCard.MODE_NAMES[c.specMode],
+                        () -> c.specMode = (c.specMode + 1) % com.xfive.live.config.SpecCard.MODE_NAMES.length));
+                out.add(slider("Spec card time", () -> (c.specSec - 3) / 27.0,
+                        v -> c.specSec = 3 + (int) Math.round(v * 27.0), () -> c.specSec + " s"));
                 out.add(cycle("Lyric animation", () -> LyricStyle.NAMES[LyricStyle.indexOf(c.lyricsAnim)],
                         () -> c.lyricsAnim = LyricStyle.next(c.lyricsAnim)));
                 out.add(toggle("Karaoke highlight", () -> c.lyricsKaraoke, () -> c.lyricsKaraoke = !c.lyricsKaraoke));
@@ -1233,8 +1241,8 @@ public final class ControlCenterScreen extends Screen {
                 return true;
             }
             int[][] boxes = {DynamicIslandHud.box(), com.xfive.live.hud.MusicHud.box(),
-                    com.xfive.live.hud.LyricsHud.box()};
-            String[] keys = {"dynamicIsland", "musicHud", "lyricsHud"};
+                    com.xfive.live.hud.LyricsHud.box(), com.xfive.live.hud.SpecHud.box()};
+            String[] keys = {"dynamicIsland", "musicHud", "lyricsHud", "specHud"};
             for (int i = 0; i < boxes.length; i++) {
                 if (in(mx, my, boxes[i])) {
                     beginHudDrag(keys[i], boxes[i], mx, my);
