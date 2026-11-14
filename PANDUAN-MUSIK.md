@@ -97,3 +97,9 @@ Catatan: cara paling mudah dan paling pasti adalah menyalin lagu langsung ke fol
 - Tidak ada koneksi ke Spotify atau YouTube. Musik hanya berasal dari file di HP.
 - HUD di dalam game tidak bisa diklik (kursor terkunci). Tekan F6 untuk membuka Control Center dan mengendalikan musik.
 - Pemutaran di Android belum diuji langsung di perangkat. Kalau tidak berbunyi, kirim status yang muncul di menu.
+
+## Kartu spesifikasi (transparan)
+
+Di halaman **Custom HUD** ada **Spec card**: Off, Auto (muncul sendiri saat lagu mulai atau berganti, lalu hilang), atau Always (selalu tampil). Lama tampil diatur di **Spec card time**. Kartunya tanpa kotak latar, muncul di bawah tampilan lagu, dan bisa digeser lewat **Drag HUD**.
+
+Teksnya bisa diganti di file `config/xfive-live.properties` (baris `spec.title`, `spec.tag`, `spec.lines`). Baris spesifikasi dipisah tanda `|`, maksimal 4 baris.
